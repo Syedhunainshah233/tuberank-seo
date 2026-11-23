@@ -243,7 +243,7 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         Chips(r.tags) { ctx.copy("Tag", it) }
                     }
                     Hint(
-                        if (p == Platform.YouTube) "Paste all tags in the Tags box of your video. Tap any single tag to copy it."
+                        if (p == Platform.YouTube) "Paste all tags in the Tags box of your video. Remove any other channel or brand name that is not in your video."
                         else "${p.label} search reads your caption, on-screen text and what you say. Use these keywords in all three.",
                     )
                     NativeAdCard()

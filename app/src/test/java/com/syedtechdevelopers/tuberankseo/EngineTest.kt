@@ -18,7 +18,7 @@ class EngineTest {
     private fun fake(kw: String): Map<String, Double> {
         val list = listOf(
             "$kw", "$kw recipe", "$kw easy", "$kw at home", "$kw in urdu", "$kw tiktok", "$kw for beginners",
-            "$kw step by step", "best $kw", "$kw masala", "$kw restaurant style", "how to make $kw",
+            "$kw step by step", "best $kw", "$kw masala", "$kw by famous chef", "$kw $kw", "$kw k", "$kw restaurant style", "how to make $kw",
         )
         return list.mapIndexed { i, s -> s to (100.0 - i * 5) }.toMap()
     }
@@ -32,6 +32,8 @@ class EngineTest {
             assertTrue("$p text", r.description.length <= p.textMax)
             assertTrue("$p no platform words in hashtags", r.hashtags.none { it.contains("tiktok", true) })
             if (p == Platform.YouTube) assertTrue("tags ${r.tagsChars}", r.tagsChars <= 500)
+            val all = (r.titles + r.tags + r.ideas).joinToString("|").lowercase()
+            assertTrue("$p creator names / junk filtered: $all", "famous chef" !in all && "biryani k|" !in all)
         }
     }
 

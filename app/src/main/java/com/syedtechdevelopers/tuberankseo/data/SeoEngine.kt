@@ -121,6 +121,18 @@ object SeoEngine {
     private fun clean(s: String): String =
         s.split(" ").filter { it !in platformWords }.joinToString(" ").trim()
 
+    /**
+     * Drops phrases that would be bad metadata: other creators' names ("... by xyz"),
+     * the keyword repeated twice, or a dangling single letter ("biryani k").
+     */
+    private fun usable(s: String, kw: String): Boolean {
+        val words = s.split(" ")
+        if (" by " in " $s " || s.startsWith("by ")) return false
+        if (words.last().length == 1 && !words.last()[0].isDigit()) return false
+        if (kw.length > 3 && s.indexOf(kw) != s.lastIndexOf(kw)) return false
+        return true
+    }
+
     fun build(
         keywordRaw: String,
         weights: Map<String, Double>,
@@ -134,7 +146,7 @@ object SeoEngine {
         val merged = LinkedHashMap<String, Double>()
         weights.entries.sortedByDescending { it.value }.forEach { (k, v) ->
             val c = clean(k)
-            if (c.length >= 2 && c != kw) merged[c] = (merged[c] ?: 0.0) + v
+            if (c.length >= 2 && c != kw && usable(c, kw)) merged[c] = (merged[c] ?: 0.0) + v
         }
         var ranked = merged.entries.sortedByDescending { it.value }.map { it.key }
         if (ranked.isEmpty()) ranked = fallback(kw, lang)
@@ -206,7 +218,7 @@ object SeoEngine {
         val templates = mutableListOf(
             "$k – Complete $m1 Guide ($y)",
             "$k for Beginners: Step by Step Tutorial",
-            "How to $k (Easy $m2 That Actually Work)",
+            "$k – Easy $m2 Anyone Can Follow",
             "10 $k Tips You Must Know in $y",
             "$k Explained in 10 Minutes",
             "Stop Making These $k Mistakes!",
@@ -226,7 +238,9 @@ object SeoEngine {
             templates.add(6, "$k Seekhein Sirf 10 Minute Mein | Urdu/Hindi")
         }
         val suffix = listOf("Full Guide", "Step by Step", "$y", "Tips & Tricks", "Explained", "Tutorial")
-        top.forEachIndexed { i, s -> templates.add(1 + i * 2, "$s | ${suffix[i % 6]}") }
+        // Real searched phrases make the strongest titles; keep the short, generic ones.
+        top.filter { it.split(" ").size <= keyword.split(" ").size + 2 }
+            .forEachIndexed { i, s -> templates.add(1 + i * 2, "$s | ${suffix[i % 6]}") }
         return rotate(templates, 20, 70, seed, k)
     }
 
@@ -306,7 +320,7 @@ object SeoEngine {
             Platform.Instagram -> cands.add(1, "Reels")
             Platform.Facebook -> {}
         }
-        return cands.filter { it.length in 2..28 }.distinctBy { it.lowercase() }.take(platform.maxHashtags).map { "#$it" }
+        return cands.filter { it.length in 2..24 }.distinctBy { it.lowercase() }.take(platform.maxHashtags).map { "#$it" }
     }
 
     fun description(keyword: String, title: String, relevant: List<String>, hashtags: List<String>, lang: String): String {
