@@ -197,7 +197,6 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
     var askMoreTitles by remember { mutableStateOf(false) }
 
     Column(Modifier.fillMaxSize()) {
-        ScoreCard(r)
         ScrollableTabRow(
             selectedTabIndex = tab,
             edgePadding = 12.dp,
@@ -218,10 +217,12 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
             Modifier
                 .weight(1f)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            if (!r.pro) PlanCard(vm)
+            // Score + plan scroll away with the results, so locked PRO content shows on the first screen.
+            ScoreCard(r)
+            if (!r.pro) PlanCard(vm, compact = true)
             when (tab) {
                 0 -> {
                     r.titles.forEachIndexed { i, t ->
@@ -367,51 +368,50 @@ fun ScorePill(text: String, good: Boolean) {
     ) { Text(text, color = c, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1) }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ScoreCard(r: SeoResult) {
     val score = r.optimization
     val anim by animateFloatAsState(score / 100f, tween(900), label = "score")
     val good = score >= 80
     val color = if (good) C.green else C.red
-    Card(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                Modifier
-                    .size(78.dp)
-                    .clip(CircleShape)
-                    .background(color.copy(alpha = 0.12f))
-                    .border(2.dp, color.copy(alpha = 0.7f), CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Canvas(Modifier.fillMaxSize().padding(6.dp)) {
-                    val sw = 7.dp.toPx()
-                    val s = Size(size.width - sw, size.height - sw)
-                    val o = Offset(sw / 2, sw / 2)
-                    drawArc(C.card2, -90f, 360f, false, o, s, style = Stroke(sw))
-                    drawArc(color, -90f, 360f * anim, false, o, s, style = Stroke(sw, cap = StrokeCap.Round))
-                }
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("$score", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = color, lineHeight = 22.sp)
-                    Text("/100", fontSize = 10.sp, color = C.muted, lineHeight = 10.sp)
-                }
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(C.card)
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+                .background(color.copy(alpha = 0.12f))
+                .border(1.5.dp, color.copy(alpha = 0.7f), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Canvas(Modifier.fillMaxSize().padding(4.dp)) {
+                val sw = 4.dp.toPx()
+                val s = Size(size.width - sw, size.height - sw)
+                val o = Offset(sw / 2, sw / 2)
+                drawArc(C.card2, -90f, 360f, false, o, s, style = Stroke(sw))
+                drawArc(color, -90f, 360f * anim, false, o, s, style = Stroke(sw, cap = StrokeCap.Round))
             }
-            Spacer(Modifier.width(14.dp))
-            Column(Modifier.weight(1f)) {
-                Text("SEO Score", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Spacer(Modifier.height(6.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    ScorePill(if (r.pro) "👑 PRO" else "Basic", r.pro)
-                    ScorePill("Search: ${r.volume}", r.volume == "High")
-                    ScorePill("Competition: ${r.competition}", r.competition == "Low")
-                }
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    if (!r.online) "Offline – connect to internet for live data"
-                    else if (r.pro) "Full SEO pack • based on live search data" else "Free plan • watch 5 ads for FREE 100/100",
-                    color = C.muted, fontSize = 11.sp,
-                )
+            Text("$score", fontSize = 16.sp, fontWeight = FontWeight.ExtraBold, color = color)
+        }
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("SEO $score/100", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                Spacer(Modifier.width(6.dp))
+                ScorePill(if (r.pro) "👑 PRO" else "Basic", r.pro)
             }
+            Spacer(Modifier.height(3.dp))
+            Text(
+                if (!r.online) "Offline – connect for live data"
+                else "Search ${r.volume} • Competition ${r.competition}",
+                color = C.muted, fontSize = 11.sp, maxLines = 1,
+            )
         }
     }
 }

@@ -73,7 +73,7 @@ class SmallScreenTests {
         shot("s320_01_home")
         rule.onAllNodes(hasSetTextAction())[0].performTextInput("chicken biryani")
         click("⚡ Generate", substring = true)
-        waitFor("SEO Score")
+        waitFor("SEO Check")
         shot("s320_02_titles")
         click("Description"); shot("s320_03_description")
         click("Hashtags"); shot("s320_04_hashtags")

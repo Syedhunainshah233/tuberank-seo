@@ -75,7 +75,7 @@ class ScreenshotTests {
         click("Close")
         rule.onAllNodes(hasSetTextAction())[0].performTextInput("chicken biryani")
         click("⚡ Generate", substring = true)
-        waitFor("SEO Score")
+        waitFor("SEO Check")
         shot("02_result_titles")
         click("Description"); shot("03_result_description")
         click("Tags"); shot("04_result_tags")
@@ -87,12 +87,12 @@ class ScreenshotTests {
         rule.runOnUiThread { rule.activity.vm.showResult = false }
         click("TikTok"); shot("08_home_tiktok")
         click("⚡ Generate", substring = true)
-        waitFor("SEO Score")
+        waitFor("SEO Check")
         shot("09_tiktok_hooks")
         click("Caption"); shot("10_tiktok_caption")
         rule.runOnUiThread { rule.activity.vm.showResult = false }
         click("Instagram")
-        click("⚡ Generate", substring = true); waitFor("SEO Score")
+        click("⚡ Generate", substring = true); waitFor("SEO Check")
         click("Hashtags"); shot("11_instagram_hashtags")
         rule.runOnUiThread { rule.activity.vm.showResult = false }
         // Use up the free generations to show the limit dialog.

@@ -49,7 +49,7 @@ fun timeLeft(ms: Long): String {
 
 /** Home screen status: free generations left, or PRO time left. */
 @Composable
-fun PlanCard(vm: AppViewModel) {
+fun PlanCard(vm: AppViewModel, compact: Boolean = false) {
     if (vm.isPro) {
         Row(
             Modifier
@@ -74,7 +74,7 @@ fun PlanCard(vm: AppViewModel) {
                 .clip(RoundedCornerShape(16.dp))
                 .background(C.card)
                 .clickable { vm.showPro = true }
-                .padding(14.dp),
+                .padding(horizontal = 14.dp, vertical = if (compact) 8.dp else 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
@@ -82,7 +82,7 @@ fun PlanCard(vm: AppViewModel) {
                     "Free: ${vm.freeLeft}/${AppViewModel.FREE_PER_DAY} left today",
                     fontWeight = FontWeight.Bold, fontSize = 14.sp,
                 )
-                Text("Basic SEO 50–60/100", color = C.muted, fontSize = 12.sp)
+                if (!compact) Text("Basic SEO 50–60/100", color = C.muted, fontSize = 12.sp)
             }
             Column(
                 Modifier
@@ -91,8 +91,8 @@ fun PlanCard(vm: AppViewModel) {
                     .padding(horizontal = 12.dp, vertical = 7.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text("👑 FREE PRO", color = C.bg, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
-                Text("Watch 5 ads", color = C.bg, fontSize = 11.sp)
+                Text(if (compact) "👑 FREE PRO • 5 ads" else "👑 FREE PRO", color = C.bg, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                if (!compact) Text("Watch 5 ads", color = C.bg, fontSize = 11.sp)
             }
         }
     }
