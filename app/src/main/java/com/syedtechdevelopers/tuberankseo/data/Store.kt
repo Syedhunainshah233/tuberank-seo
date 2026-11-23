@@ -34,20 +34,6 @@ class Store(context: Context) {
         get() = sp.getLong("proUntil", 0L)
         set(v) = sp.edit().putLong("proUntil", v).apply()
 
-    // ---- Google account (kept only on this phone) ----
-    var userName: String
-        get() = sp.getString("userName", "") ?: ""
-        set(v) = sp.edit().putString("userName", v).apply()
-    var userEmail: String
-        get() = sp.getString("userEmail", "") ?: ""
-        set(v) = sp.edit().putString("userEmail", v).apply()
-    var userPhoto: String
-        get() = sp.getString("userPhoto", "") ?: ""
-        set(v) = sp.edit().putString("userPhoto", v).apply()
-    var loginSkipped: Boolean
-        get() = sp.getBoolean("loginSkipped", false)
-        set(v) = sp.edit().putBoolean("loginSkipped", v).apply()
-
     var generations: Int
         get() = sp.getInt("gens", 0)
         set(v) = sp.edit().putInt("gens", v).apply()

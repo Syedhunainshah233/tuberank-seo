@@ -42,7 +42,7 @@ class EngineTest {
         for (p in Platform.entries) {
             val w = fake("chicken biryani") + (1..30).associate { "chicken biryani idea $it" to 1.0 }
             val pro = SeoEngine.build("chicken biryani", w, true, "en", "PK", p, pro = true)
-            val basic = SeoEngine.build("chicken biryani", w, true, "en", "PK", p, pro = false)
+            val basic = SeoEngine.basic(SeoEngine.build("chicken biryani", w, true, "en", "PK", p, pro = false))
             assertTrue("$p pro ${pro.optimization} ${pro.checklist()}", pro.optimization == 100)
             assertTrue("$p basic ${basic.optimization} ${basic.checklist()}", basic.optimization in 50..60)
             assertTrue(basic.titles.size == 3 && basic.hashtags.size == 5)

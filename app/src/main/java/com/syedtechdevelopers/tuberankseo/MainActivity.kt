@@ -42,7 +42,6 @@ import com.syedtechdevelopers.tuberankseo.ui.HomeScreen
 import com.syedtechdevelopers.tuberankseo.ui.ResultScreen
 import com.syedtechdevelopers.tuberankseo.ui.SettingsScreen
 import com.syedtechdevelopers.tuberankseo.ui.TubeTheme
-import com.syedtechdevelopers.tuberankseo.ui.WelcomeScreen
 import com.syedtechdevelopers.tuberankseo.ui.findActivity
 
 class MainActivity : ComponentActivity() {
@@ -54,9 +53,7 @@ class MainActivity : ComponentActivity() {
         coldStart = savedInstanceState == null
         enableEdgeToEdge()
         setContent {
-            TubeTheme {
-                if (vm.showWelcome) WelcomeScreen(vm) else App(vm)
-            }
+            TubeTheme { App(vm) }
         }
         Ads.start(this)
     }

@@ -70,10 +70,8 @@ class ScreenshotTests {
 
     @Test
     fun walkThrough() {
-        shot("00_welcome_login")
-        skipLogin()
         shot("01_home_youtube")
-        click("👑 Get PRO", substring = true); shot("01b_pro_dialog")
+        click("FREE PRO", substring = true); shot("01b_pro_dialog")
         click("Close")
         rule.onAllNodes(hasSetTextAction())[0].performTextInput("chicken biryani")
         click("⚡ Generate", substring = true)
@@ -83,6 +81,8 @@ class ScreenshotTests {
         click("Tags"); shot("04_result_tags")
         click("Hashtags"); shot("05_result_hashtags")
         click("Ideas"); shot("06_result_ideas_locked")
+        rule.onAllNodesWithText("Unlock FREE", substring = true)[0].let { runCatching { it.performScrollTo() } }
+        shot("06b_locked_preview")
         click("SEO Check"); shot("07_result_check")
         rule.runOnUiThread { rule.activity.vm.showResult = false }
         click("TikTok"); shot("08_home_tiktok")

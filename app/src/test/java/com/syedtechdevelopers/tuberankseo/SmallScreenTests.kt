@@ -70,8 +70,6 @@ class SmallScreenTests {
 
     @Test
     fun walkThrough320() {
-        shot("s320_00_welcome")
-        skipLogin()
         shot("s320_01_home")
         rule.onAllNodes(hasSetTextAction())[0].performTextInput("chicken biryani")
         click("⚡ Generate", substring = true)
@@ -81,7 +79,7 @@ class SmallScreenTests {
         click("Hashtags"); shot("s320_04_hashtags")
         click("SEO Check"); shot("s320_05_check")
         rule.runOnUiThread { rule.activity.vm.showResult = false }
-        click("👑 Get PRO", substring = true); shot("s320_06_pro")
+        click("FREE PRO", substring = true); shot("s320_06_pro")
         click("Close")
         click("Facebook"); shot("s320_07_home_facebook")
         click("Settings"); shot("s320_08_settings")

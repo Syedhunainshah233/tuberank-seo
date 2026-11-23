@@ -106,10 +106,6 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-core")
 
-    // Google sign-in (name, email, photo) via Google Identity Services
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
-
     // AdMob + consent (GDPR) form
     implementation("com.google.android.gms:play-services-ads:23.5.0")
     implementation("com.google.android.ump:user-messaging-platform:3.1.0")

@@ -68,6 +68,7 @@ import com.syedtechdevelopers.tuberankseo.AppViewModel
 import com.syedtechdevelopers.tuberankseo.ads.Ads
 import com.syedtechdevelopers.tuberankseo.ads.NativeAdCard
 import com.syedtechdevelopers.tuberankseo.data.Platform
+import com.syedtechdevelopers.tuberankseo.data.SeoEngine
 import com.syedtechdevelopers.tuberankseo.data.SeoResult
 import kotlinx.coroutines.delay
 
@@ -108,7 +109,7 @@ fun ResultScreen(vm: AppViewModel) {
                 fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 1, modifier = Modifier.weight(1f),
             )
             if (r != null) {
-                IconButton(onClick = { ctx.shareText(allText(r)) }) { Icon(Icons.Filled.Share, "Share all") }
+                IconButton(onClick = { ctx.shareText(allText(if (r.pro || vm.isPro) r else SeoEngine.basic(r))) }) { Icon(Icons.Filled.Share, "Share all") }
             }
         }
         if (r == null || vm.loading) {
@@ -183,8 +184,13 @@ private fun Loading() {
 }
 
 @Composable
-private fun Results(vm: AppViewModel, r: SeoResult) {
+private fun Results(vm: AppViewModel, full: SeoResult) {
     val ctx = LocalContext.current
+    // Results made during PRO (or while PRO is active) show everything; otherwise the Basic view,
+    // with the full PRO version blurred underneath each tab.
+    val unlocked = full.pro || vm.isPro
+    val r = if (unlocked) full.copy(pro = true) else SeoEngine.basic(full)
+    val lockedFull = full.copy(pro = true)
     var tab by rememberSaveable { mutableIntStateOf(0) }
     val p = r.platform
     val tabs = listOf(p.headlineName, p.textName, p.keywordsName, "Hashtags", "Ideas", "SEO Check")
@@ -222,7 +228,9 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         CopyRow(t, "${t.length}/${p.headlineMax}", if (i == 0) "Best" else null) { ctx.copy(p.headlineName.dropLast(1), t) }
                         if (i == 3) NativeAdCard()
                     }
-                    if (!r.pro) ProUpsell(vm, "9 more ${p.headlineName.lowercase()}")
+                    if (!unlocked) LockedPreview(vm, "${full.titles.size} PRO ${p.headlineName.lowercase()}") {
+                        full.titles.drop(3).take(6).forEach { t -> CopyRow(t, "${t.length}/${p.headlineMax}", null) {} }
+                    }
                     OutlineAction("↻  More ${p.headlineName.lowercase()}", Icons.Filled.Refresh) { askMoreTitles = true }
                 }
 
@@ -235,7 +243,9 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         Spacer(Modifier.height(8.dp))
                         Text(r.description, fontSize = 14.sp, lineHeight = 20.sp)
                     }
-                    if (!r.pro) ProUpsell(vm, "Full ${p.textName.lowercase()} with keywords, chapters & call to action")
+                    if (!unlocked) LockedPreview(vm, "Full ${p.textName.lowercase()} (${full.description.length} characters)") {
+                        Card { Text(full.description, fontSize = 14.sp, lineHeight = 20.sp, maxLines = 18) }
+                    }
                     NativeAdCard()
                 }
 
@@ -251,7 +261,9 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         Spacer(Modifier.height(10.dp))
                         Chips(r.tags) { ctx.copy("Tag", it) }
                     }
-                    if (!r.pro) ProUpsell(vm, if (p == Platform.YouTube) "Full tag set (up to 500 characters)" else "20 search keywords")
+                    if (!unlocked) LockedPreview(vm, if (p == Platform.YouTube) "${full.tags.size} PRO tags (${full.tagsChars}/500)" else "${full.tags.size} PRO keywords") {
+                        Card { Chips(full.tags) {} }
+                    }
                     Hint(
                         if (p == Platform.YouTube) "Paste all tags in the Tags box of your video. Remove any other channel or brand name that is not in your video."
                         else "${p.label} search reads your caption, on-screen text and what you say. Use these keywords in all three.",
@@ -268,7 +280,9 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         Spacer(Modifier.height(10.dp))
                         Chips(r.hashtags) { ctx.copy("Hashtag", it) }
                     }
-                    if (!r.pro && p.maxHashtags > r.hashtags.size) ProUpsell(vm, "Up to ${p.maxHashtags} best hashtags")
+                    if (!unlocked && full.hashtags.size > r.hashtags.size) LockedPreview(vm, "${full.hashtags.size} PRO hashtags") {
+                        Card { Chips(full.hashtags) {} }
+                    }
                     Hint(
                         when (p) {
                             Platform.YouTube -> "The first 3 hashtags appear above your video title. Never use more than 15."
@@ -279,7 +293,7 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                     NativeAdCard()
                 }
 
-                4 -> Ideas(vm, r)
+                4 -> Ideas(vm, r, full, unlocked)
 
                 5 -> {
                     Card {
@@ -291,6 +305,11 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                                 Spacer(Modifier.width(10.dp))
                                 Text(c.text, fontSize = 14.sp, color = if (c.ok) C.green else C.red)
                             }
+                        }
+                    }
+                    if (!unlocked) LockedPreview(vm, "PRO checklist – ${lockedFull.optimization}/100") {
+                        Card {
+                            lockedFull.checklist().forEach { c -> Text("✅ ${c.text}", fontSize = 14.sp, color = C.green, modifier = Modifier.padding(vertical = 4.dp)) }
                         }
                     }
                     Card {
@@ -319,11 +338,13 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
 }
 
 @Composable
-private fun Ideas(vm: AppViewModel, r: SeoResult) {
+private fun Ideas(vm: AppViewModel, r: SeoResult, full: SeoResult, unlocked: Boolean) {
     val ctx = LocalContext.current
-    if (!r.pro) {
+    if (!unlocked) {
         r.ideas.take(3).forEach { CopyRow(it, null, null) { ctx.copy("Keyword", it) } }
-        ProUpsell(vm, "Video ideas & long-tail keywords")
+        LockedPreview(vm, "${full.ideas.size} video ideas & long-tail keywords") {
+            full.ideas.drop(3).take(8).forEach { CopyRow(it, null, null) {} }
+        }
         NativeAdCard()
     } else {
         r.ideas.forEachIndexed { i, s ->
@@ -387,7 +408,7 @@ private fun ScoreCard(r: SeoResult) {
                 Spacer(Modifier.height(6.dp))
                 Text(
                     if (!r.online) "Offline – connect to internet for live data"
-                    else if (r.pro) "Full SEO pack • based on live search data" else "Free = Basic SEO. Get PRO for 100/100",
+                    else if (r.pro) "Full SEO pack • based on live search data" else "Free plan • watch 5 ads for FREE 100/100",
                     color = C.muted, fontSize = 11.sp,
                 )
             }

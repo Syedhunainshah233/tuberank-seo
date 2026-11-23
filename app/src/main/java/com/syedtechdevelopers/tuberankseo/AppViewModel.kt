@@ -94,31 +94,6 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         return false
     }
 
-    // ---------- Google account ----------
-    var userName by mutableStateOf(store.userName)
-        private set
-    var userEmail by mutableStateOf(store.userEmail)
-        private set
-    var userPhoto by mutableStateOf(store.userPhoto)
-        private set
-    var showWelcome by mutableStateOf(store.userEmail.isBlank() && !store.loginSkipped)
-        private set
-
-    fun signedIn(p: com.syedtechdevelopers.tuberankseo.ui.GoogleProfile) {
-        userName = p.name; userEmail = p.email; userPhoto = p.photo
-        store.userName = p.name; store.userEmail = p.email; store.userPhoto = p.photo
-        showWelcome = false
-    }
-
-    fun skipLogin() {
-        store.loginSkipped = true; showWelcome = false
-    }
-
-    fun signOut() {
-        userName = ""; userEmail = ""; userPhoto = ""
-        store.userName = ""; store.userEmail = ""; store.userPhoto = ""
-    }
-
     var loading by mutableStateOf(false)
         private set
     var result by mutableStateOf<SeoResult?>(null)

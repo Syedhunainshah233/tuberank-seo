@@ -1,5 +1,6 @@
 package com.syedtechdevelopers.tuberankseo.ui
 
+import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,6 +8,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,9 +30,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.syedtechdevelopers.tuberankseo.AppViewModel
@@ -77,14 +82,18 @@ fun PlanCard(vm: AppViewModel) {
                     "Free: ${vm.freeLeft}/${AppViewModel.FREE_PER_DAY} left today",
                     fontWeight = FontWeight.Bold, fontSize = 14.sp,
                 )
-                Text("Basic SEO 50–60/100 • PRO = 100/100", color = C.muted, fontSize = 12.sp)
+                Text("Basic SEO 50–60/100", color = C.muted, fontSize = 12.sp)
             }
-            Box(
+            Column(
                 Modifier
                     .clip(RoundedCornerShape(12.dp))
                     .background(GOLD)
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-            ) { Text("👑 Get PRO", color = C.bg, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp) }
+                    .padding(horizontal = 12.dp, vertical = 7.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text("👑 FREE PRO", color = C.bg, fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+                Text("Watch 5 ads", color = C.bg, fontSize = 11.sp)
+            }
         }
     }
 }
@@ -105,7 +114,7 @@ fun LimitDialog(vm: AppViewModel) {
         },
         confirmButton = {
             TextButton(onClick = { vm.showLimit = false; vm.showPro = true }) {
-                Text("👑 Get PRO", color = GOLD, fontWeight = FontWeight.Bold)
+                Text("🎬 Watch 5 ads – FREE PRO", color = GOLD, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = { TextButton(onClick = { vm.showLimit = false }) { Text("Later", color = C.muted) } },
@@ -120,13 +129,16 @@ fun ProDialog(vm: AppViewModel) {
     AlertDialog(
         onDismissRequest = { if (!loading) vm.showPro = false },
         containerColor = C.card,
-        title = { Text("👑 TubeRank PRO – ${AppViewModel.PRO_HOURS} hours free", fontWeight = FontWeight.Bold) },
+        title = { Text("👑 PRO is FREE – no payment", fontWeight = FontWeight.Bold) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text("Watch ${AppViewModel.ADS_FOR_PRO} short ads to unlock PRO:", color = C.muted)
+                Text(
+                    "You don't pay anything. Just watch ${AppViewModel.ADS_FOR_PRO} short ads and PRO unlocks for ${AppViewModel.PRO_HOURS} hours:",
+                    color = C.muted,
+                )
                 listOf(
                     "Unlimited generations for ${AppViewModel.PRO_HOURS} hours",
-                    "Full SEO pack – 100% of the SEO checklist",
+                    "SEO score 100/100 (free plan is 50–60)",
                     "12 titles / hooks, full description or caption",
                     "Full tags (up to 500 characters) & all hashtags",
                     "Video ideas & long-tail keywords",
@@ -144,7 +156,7 @@ fun ProDialog(vm: AppViewModel) {
                     }
                 }
                 Text(
-                    "An ad still plays when you tap Generate. Scores are estimates; no tool can guarantee rankings.",
+                    "No payment, no subscription, no card. An ad still plays when you tap Generate. Scores are estimates; no tool can guarantee rankings.",
                     color = C.muted, fontSize = 11.sp,
                 )
             }
@@ -173,7 +185,7 @@ fun ProDialog(vm: AppViewModel) {
                 if (loading) {
                     CircularProgressIndicator(color = GOLD, strokeWidth = 2.dp, modifier = Modifier.size(18.dp))
                 } else {
-                    Text("▶ Watch ad (${vm.proAds}/${AppViewModel.ADS_FOR_PRO})", color = GOLD, fontWeight = FontWeight.Bold)
+                    Text("▶ Watch ad ${vm.proAds + 1} of ${AppViewModel.ADS_FOR_PRO} (free)", color = GOLD, fontWeight = FontWeight.Bold)
                 }
             }
         },
@@ -181,30 +193,59 @@ fun ProDialog(vm: AppViewModel) {
     )
 }
 
-/** Shown inside results for things only PRO unlocks. */
+/** Big clear button text used everywhere: PRO is free, it only costs 5 ads. */
+const val FREE_PRO_CTA = "🎬 Watch 5 ads • Unlock FREE"
+
+/**
+ * Shows the full PRO result blurred, with a lock card on top:
+ * "100/100 SEO – watch 5 ads to unlock, no payment".
+ */
 @Composable
-fun ProUpsell(vm: AppViewModel, what: String) {
-    Column(
+fun LockedPreview(vm: AppViewModel, title: String, content: @Composable ColumnScope.() -> Unit) {
+    val blurOk = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    Box(
         Modifier
             .fillMaxWidth()
+            .heightIn(max = 360.dp)
             .clip(RoundedCornerShape(18.dp))
-            .background(C.card)
-            .border(1.dp, GOLD.copy(alpha = 0.5f), RoundedCornerShape(18.dp))
-            .clickable { vm.showPro = true }
-            .padding(16.dp),
+            .border(1.dp, GOLD.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
+            .clickable { vm.showPro = true },
     ) {
-        Text("🔒 $what", fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            "Free results are Basic (about 50% optimized). Watch ${AppViewModel.ADS_FOR_PRO} ads for ${AppViewModel.PRO_HOURS} hours of PRO.",
-            color = C.muted, fontSize = 13.sp,
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .then(if (blurOk) Modifier.blur(9.dp) else Modifier)
+                .padding(6.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            content = content,
         )
-        Spacer(Modifier.height(10.dp))
+        // Older phones can't blur: cover more strongly so the text can't be read.
         Box(
             Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(GOLD)
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-        ) { Text("👑 Unlock PRO", color = C.bg, fontWeight = FontWeight.ExtraBold) }
+                .matchParentSize()
+                .background(C.bg.copy(alpha = if (blurOk) 0.35f else 0.88f)),
+        )
+        Column(
+            Modifier
+                .align(Alignment.Center)
+                .padding(16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(C.card.copy(alpha = 0.96f))
+                .border(1.dp, GOLD, RoundedCornerShape(16.dp))
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text("🔒 $title", fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(4.dp))
+            Text("100/100 SEO with PRO", color = C.green, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            Text("100% FREE • No payment • ${AppViewModel.PRO_HOURS} hours", color = C.muted, fontSize = 12.sp, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(10.dp))
+            Box(
+                Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(GOLD)
+                    .padding(horizontal = 14.dp, vertical = 9.dp),
+            ) { Text(FREE_PRO_CTA, color = C.bg, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp) }
+        }
     }
 }

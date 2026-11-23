@@ -203,11 +203,11 @@ object SeoEngine {
             tags = tags, hashtags = hashtags, ideas = ideas, score = score, volume = volume,
             competition = competition, online = online, platform = platform,
         )
-        return if (pro) full else basic(full, relevant)
+        return full.copy(pro = pro)
     }
 
-    /** Free (Basic) version: fewer titles, short text, fewer tags/hashtags, no ideas. */
-    private fun basic(r: SeoResult, relevant: List<String>): SeoResult {
+    /** Free (Basic) view of a full result: fewer titles, short text, fewer tags/hashtags, 3 ideas. */
+    fun basic(r: SeoResult): SeoResult {
         val tags = mutableListOf<String>()
         var chars = 0
         for (t in r.tags) {
@@ -225,7 +225,7 @@ object SeoEngine {
         }
         return r.copy(
             titles = r.titles.take(3), description = text, tags = tags, hashtags = hashtags,
-            ideas = relevant.take(3).map { titleCase(it) }, pro = false,
+            ideas = r.ideas.take(3), pro = false,
         )
     }
 
