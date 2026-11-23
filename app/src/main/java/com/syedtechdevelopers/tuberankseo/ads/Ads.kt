@@ -52,7 +52,7 @@ import java.lang.ref.WeakReference
  *  1. App open        – app launch and coming back to the app
  *  2. Banner          – bottom of every screen
  *  3. Interstitial    – every tap on "Generate" (results load behind it)
- *  4. Rewarded        – optional: unlock "Video ideas" (40 long-tail keywords)
+ *  4. Rewarded        – optional: watch 5 to get PRO for 5 hours (unlimited, full SEO)
  *  5. Rewarded interstitial – optional: "More titles", after an intro dialog with a skip option
  *  6. Native          – inside results and history, with a clear "Ad" label
  */
@@ -182,20 +182,37 @@ object Ads {
         )
     }
 
-    /** [onReward] runs only if the video was watched; [onFailed] if no ad is available. */
-    fun showRewarded(activity: Activity?, onReward: () -> Unit, onFailed: () -> Unit) {
-        val ad = rewarded
-        if (activity == null || !ready || ad == null) {
-            activity?.let { if (ready) loadRewarded(it.applicationContext) }
+    /**
+     * [onReward] runs only if the video was watched; [onClosed] when the ad screen closes;
+     * [onFailed] if no ad could be loaded. Loads on demand when none is waiting.
+     */
+    fun showRewarded(activity: Activity?, onReward: () -> Unit, onFailed: () -> Unit, onClosed: () -> Unit = {}) {
+        if (activity == null || !ready) {
             onFailed(); return
         }
+        val ad = rewarded
+        if (ad == null) {
+            RewardedAd.load(
+                activity, BuildConfig.AD_REWARDED, AdRequest.Builder().build(),
+                object : RewardedAdLoadCallback() {
+                    override fun onAdLoaded(loaded: RewardedAd) {
+                        rewarded = loaded
+                        showRewarded(activity, onReward, onFailed, onClosed)
+                    }
+
+                    override fun onAdFailedToLoad(error: LoadAdError) = onFailed()
+                },
+            )
+            return
+        }
+        rewarded = null
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
-                rewarded = null; loadRewarded(activity.applicationContext)
+                loadRewarded(activity.applicationContext); onClosed()
             }
 
             override fun onAdFailedToShowFullScreenContent(e: AdError) {
-                rewarded = null; loadRewarded(activity.applicationContext); onFailed()
+                loadRewarded(activity.applicationContext); onFailed()
             }
         }
         lastShownAt = System.currentTimeMillis()

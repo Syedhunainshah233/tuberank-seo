@@ -46,8 +46,12 @@ data class SeoResult(
     val competition: String,
     val online: Boolean,
     val platform: Platform = Platform.YouTube,
+    val pro: Boolean = true,
     val createdAt: Long = System.currentTimeMillis(),
 ) {
+    /** Share of the SEO checklist this result completes (Basic ≈ 50%, PRO = 100% when online). */
+    val optimization: Int get() = checklist().let { c -> c.count { it.ok } * 100 / c.size }
+
     val tagsText: String get() = tags.joinToString(", ")
     val hashtagsText: String get() = hashtags.joinToString(" ")
     val tagsChars: Int get() = tagsText.length
@@ -67,14 +71,19 @@ data class SeoResult(
                 list += Check(description.lowercase().take(160).contains(kw), "Keyword in the first 2 lines of the description")
                 list += Check(tagsChars in 200..500, "Tags use $tagsChars/500 characters")
                 list += Check(hashtags.size in 3..15, "${hashtags.size} hashtags (3–15, first 3 show above the title)")
+                list += Check(description.contains("00:00"), "Chapters / timestamps in the description")
+                list += Check(description.contains("Related searches"), "Related search phrases in the description")
             }
             else -> {
                 list += Check(description.length <= p.textMax, "${p.textName} is ${description.length}/${p.textMax} characters")
                 list += Check(description.lowercase().take(p.headlineMax).contains(kw), "Keyword in the first line people see")
                 list += Check(hashtags.size in 3..p.maxHashtags, "${hashtags.size} hashtags (max ${p.maxHashtags} on ${p.label})")
-                list += Check(tags.size >= 5, "${tags.size} search keywords to say in your video / on-screen text")
+                list += Check(tags.size >= 10, "${tags.size} search keywords to say in your video / on-screen text")
+                list += Check(description.contains("✨"), "Keyword-rich points in the ${p.textName.lowercase()}")
+                list += Check(description.contains("➕") || description.contains("👍"), "Call to action (follow, save, share)")
             }
         }
+        list += Check(ideas.size >= 10, "${ideas.size} long-tail keyword ideas for more videos")
         list += Check(online, if (online) "Based on live search suggestions" else "Offline mode: connect to the internet for live data")
         return list
     }
@@ -140,6 +149,7 @@ object SeoEngine {
         lang: String,
         country: String,
         platform: Platform = Platform.YouTube,
+        pro: Boolean = true,
     ): SeoResult {
         val keyword = keywordRaw.trim().replace(Regex("\\s+"), " ")
         val kw = keyword.lowercase()
@@ -187,10 +197,34 @@ object SeoEngine {
             words == 3 -> "Medium"
             else -> "Low"
         }
-        return SeoResult(
+        val full = SeoResult(
             keyword = keyword, lang = lang, country = country, titles = titles, description = description,
             tags = tags, hashtags = hashtags, ideas = ideas, score = score, volume = volume,
             competition = competition, online = online, platform = platform,
+        )
+        return if (pro) full else basic(full, relevant)
+    }
+
+    /** Free (Basic) version: fewer titles, short text, fewer tags/hashtags, no ideas. */
+    private fun basic(r: SeoResult, relevant: List<String>): SeoResult {
+        val tags = mutableListOf<String>()
+        var chars = 0
+        for (t in r.tags) {
+            val add = t.length + if (tags.isEmpty()) 0 else 2
+            if (chars + add > 150 || (r.platform != Platform.YouTube && tags.size >= 5)) break
+            tags += t; chars += add
+        }
+        val hashtags = r.hashtags.take(3)
+        val first = r.titles.first()
+        val text = if (r.platform == Platform.YouTube) {
+            "$first\n\nIn this video you will learn ${r.keyword} step by step. " +
+                "Watch till the end for the best tips about ${r.keyword}.\n\n" + hashtags.joinToString(" ")
+        } else {
+            "$first\n\nEverything about ${r.keyword} in one place.\n\n" + hashtags.joinToString(" ")
+        }
+        return r.copy(
+            titles = r.titles.take(3), description = text, tags = tags, hashtags = hashtags,
+            ideas = relevant.take(3).map { titleCase(it) }, pro = false,
         )
     }
 

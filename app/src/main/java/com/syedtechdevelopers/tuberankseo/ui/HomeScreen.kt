@@ -89,6 +89,7 @@ fun HomeScreen(vm: AppViewModel, onGenerate: () -> Unit) {
 
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             PlatformTabs(vm.platform) { vm.setPlatformTo(it) }
+            PlanCard(vm)
             Card {
                 Text("${vm.platform.label} video topic or keyword", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Text(

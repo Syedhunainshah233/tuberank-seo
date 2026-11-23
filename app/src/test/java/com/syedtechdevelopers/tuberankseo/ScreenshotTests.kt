@@ -49,6 +49,8 @@ class ScreenshotTests {
     @Test
     fun walkThrough() {
         shot("01_home_youtube")
+        click("👑 Get PRO", substring = true); shot("01b_pro_dialog")
+        click("Close")
         rule.onAllNodes(hasSetTextAction())[0].performTextInput("chicken biryani")
         click("⚡ Generate", substring = true)
         waitFor("SEO Score")
@@ -69,6 +71,10 @@ class ScreenshotTests {
         click("⚡ Generate", substring = true); waitFor("SEO Score")
         click("Hashtags"); shot("11_instagram_hashtags")
         rule.runOnUiThread { rule.activity.vm.showResult = false }
+        // Use up the free generations to show the limit dialog.
+        rule.runOnUiThread { repeat(5) { rule.activity.vm.store.freeUsed = 5 } }
+        click("⚡ Generate", substring = true); shot("11b_limit_dialog")
+        click("Later")
         click("History"); shot("12_history")
         click("Settings"); shot("13_settings")
     }

@@ -38,6 +38,18 @@ class EngineTest {
     }
 
     @Test
+    fun basicIsAboutHalfProIsFull() {
+        for (p in Platform.entries) {
+            val w = fake("chicken biryani") + (1..30).associate { "chicken biryani idea $it" to 1.0 }
+            val pro = SeoEngine.build("chicken biryani", w, true, "en", "PK", p, pro = true)
+            val basic = SeoEngine.build("chicken biryani", w, true, "en", "PK", p, pro = false)
+            assertTrue("$p pro ${pro.optimization} ${pro.checklist()}", pro.optimization == 100)
+            assertTrue("$p basic ${basic.optimization} ${basic.checklist()}", basic.optimization in 40..60)
+            assertTrue(basic.titles.size == 3 && basic.hashtags.size <= 3)
+        }
+    }
+
+    @Test
     fun offlineStillWorks() {
         val r = SeoEngine.build("photo editing", emptyMap(), false, "en", "GLOBAL", Platform.YouTube)
         assertTrue(r.titles.isNotEmpty() && r.tags.isNotEmpty() && r.hashtags.isNotEmpty())

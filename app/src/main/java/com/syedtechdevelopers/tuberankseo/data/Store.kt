@@ -20,6 +20,20 @@ class Store(context: Context) {
         get() = Platform.of(sp.getString("platform", "YouTube") ?: "YouTube")
         set(v) = sp.edit().putString("platform", v.name).apply()
 
+    // ---- Free limit (resets every day) and PRO time ----
+    var freeDay: String
+        get() = sp.getString("freeDay", "") ?: ""
+        set(v) = sp.edit().putString("freeDay", v).apply()
+    var freeUsed: Int
+        get() = sp.getInt("freeUsed", 0)
+        set(v) = sp.edit().putInt("freeUsed", v).apply()
+    var proAds: Int
+        get() = sp.getInt("proAds", 0)
+        set(v) = sp.edit().putInt("proAds", v).apply()
+    var proUntil: Long
+        get() = sp.getLong("proUntil", 0L)
+        set(v) = sp.edit().putLong("proUntil", v).apply()
+
     var generations: Int
         get() = sp.getInt("gens", 0)
         set(v) = sp.edit().putInt("gens", v).apply()
@@ -42,7 +56,7 @@ class Store(context: Context) {
         put("k", r.keyword); put("l", r.lang); put("c", r.country)
         put("t", r.titles.json()); put("d", r.description); put("g", r.tags.json())
         put("h", r.hashtags.json()); put("i", r.ideas.json()); put("s", r.score)
-        put("v", r.volume); put("comp", r.competition); put("o", r.online); put("at", r.createdAt); put("p", r.platform.name)
+        put("v", r.volume); put("comp", r.competition); put("o", r.online); put("at", r.createdAt); put("p", r.platform.name); put("pro", r.pro)
     }
 
     private fun fromJson(o: JSONObject) = SeoResult(
@@ -51,6 +65,6 @@ class Store(context: Context) {
         tags = o.getJSONArray("g").strings(), hashtags = o.getJSONArray("h").strings(),
         ideas = o.optJSONArray("i")?.strings() ?: emptyList(), score = o.getInt("s"),
         volume = o.getString("v"), competition = o.getString("comp"), online = o.getBoolean("o"),
-        createdAt = o.getLong("at"), platform = Platform.of(o.optString("p", "YouTube")),
+        createdAt = o.getLong("at"), platform = Platform.of(o.optString("p", "YouTube")), pro = o.optBoolean("pro", true),
     )
 }

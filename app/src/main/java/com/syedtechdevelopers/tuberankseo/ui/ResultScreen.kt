@@ -186,6 +186,7 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
 
     Column(Modifier.fillMaxSize()) {
         ScoreCard(r)
+        if (!r.pro) Box(Modifier.padding(horizontal = 16.dp)) { PlanCard(vm) }
         ScrollableTabRow(
             selectedTabIndex = tab,
             edgePadding = 12.dp,
@@ -215,6 +216,7 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         CopyRow(t, "${t.length}/${p.headlineMax}", if (i == 0) "Best" else null) { ctx.copy(p.headlineName.dropLast(1), t) }
                         if (i == 3) NativeAdCard()
                     }
+                    if (!r.pro) ProUpsell(vm, "9 more ${p.headlineName.lowercase()}")
                     OutlineAction("↻  More ${p.headlineName.lowercase()}", Icons.Filled.Refresh) { askMoreTitles = true }
                 }
 
@@ -227,6 +229,7 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         Spacer(Modifier.height(8.dp))
                         Text(r.description, fontSize = 14.sp, lineHeight = 20.sp)
                     }
+                    if (!r.pro) ProUpsell(vm, "Full ${p.textName.lowercase()} with keywords, chapters & call to action")
                     NativeAdCard()
                 }
 
@@ -242,6 +245,7 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         Spacer(Modifier.height(10.dp))
                         Chips(r.tags) { ctx.copy("Tag", it) }
                     }
+                    if (!r.pro) ProUpsell(vm, if (p == Platform.YouTube) "Full tag set (up to 500 characters)" else "20 search keywords")
                     Hint(
                         if (p == Platform.YouTube) "Paste all tags in the Tags box of your video. Remove any other channel or brand name that is not in your video."
                         else "${p.label} search reads your caption, on-screen text and what you say. Use these keywords in all three.",
@@ -258,6 +262,7 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         Spacer(Modifier.height(10.dp))
                         Chips(r.hashtags) { ctx.copy("Hashtag", it) }
                     }
+                    if (!r.pro) ProUpsell(vm, "All ${p.maxHashtags} best hashtags")
                     Hint(
                         when (p) {
                             Platform.YouTube -> "The first 3 hashtags appear above your video title. Never use more than 15."
@@ -272,7 +277,7 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
 
                 5 -> {
                     Card {
-                        Text("SEO checklist", fontWeight = FontWeight.Bold)
+                        Text("SEO checklist – ${r.optimization}% done", fontWeight = FontWeight.Bold)
                         Spacer(Modifier.height(8.dp))
                         r.checklist().forEach { c ->
                             Row(Modifier.padding(vertical = 5.dp), verticalAlignment = Alignment.Top) {
@@ -310,31 +315,9 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
 @Composable
 private fun Ideas(vm: AppViewModel, r: SeoResult) {
     val ctx = LocalContext.current
-    if (!vm.ideasUnlocked) {
-        Card {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Lock, null, tint = C.yellow)
-                Spacer(Modifier.width(10.dp))
-                Text("Video ideas & long-tail keywords", fontWeight = FontWeight.Bold)
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "${r.ideas.size} keywords people search around \"${r.keyword}\". Make a video on each one to get more views.",
-                color = C.muted, fontSize = 14.sp,
-            )
-            Spacer(Modifier.height(14.dp))
-            GradientButton("🎬 Watch ad to unlock") {
-                Ads.showRewarded(
-                    ctx.findActivity(),
-                    onReward = { vm.ideasUnlocked = true },
-                    onFailed = {
-                        // No ad available right now: unlock anyway rather than block the user.
-                        vm.ideasUnlocked = true
-                    },
-                )
-            }
-        }
+    if (!r.pro) {
         r.ideas.take(3).forEach { CopyRow(it, null, null) { ctx.copy("Keyword", it) } }
+        ProUpsell(vm, "Video ideas & long-tail keywords")
         NativeAdCard()
     } else {
         r.ideas.forEachIndexed { i, s ->
@@ -366,7 +349,11 @@ private fun ScoreCard(r: SeoResult) {
             }
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text("SEO Score", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("SEO Score", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Spacer(Modifier.width(8.dp))
+                    Pill(if (r.pro) "👑 PRO ${r.optimization}%" else "Basic ${r.optimization}%", if (r.pro) GOLD else C.muted)
+                }
                 Spacer(Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Pill("Search: ${r.volume}", C.green)

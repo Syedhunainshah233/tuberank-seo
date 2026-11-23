@@ -3,6 +3,7 @@ package com.syedtechdevelopers.tuberankseo
 import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
@@ -36,11 +37,67 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         platform = p; store.platform = p
     }
 
+    // ---------- Free limit & PRO ----------
+    companion object {
+        const val FREE_PER_DAY = 5
+        const val ADS_FOR_PRO = 5
+        const val PRO_HOURS = 5
+    }
+
+    private fun today() = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.US).format(java.util.Date())
+
+    var proUntil by mutableStateOf(store.proUntil)
+        private set
+    var proAds by mutableStateOf(store.proAds)
+        private set
+    var freeUsed by mutableIntStateOf(0)
+        private set
+    var showLimit by mutableStateOf(false)
+    var showPro by mutableStateOf(false)
+
+    /** Updated once a minute by the UI so the timer and PRO state stay current. */
+    var now by mutableStateOf(System.currentTimeMillis())
+
+    val isPro: Boolean get() = proUntil > now
+    val freeLeft: Int get() = (FREE_PER_DAY - freeUsed).coerceAtLeast(0)
+
+    init {
+        refreshDay()
+    }
+
+    fun refreshDay() {
+        now = System.currentTimeMillis()
+        if (store.freeDay != today()) {
+            store.freeDay = today(); store.freeUsed = 0
+        }
+        freeUsed = store.freeUsed
+    }
+
+    /** Call after each fully watched rewarded ad. Returns true when PRO was just activated. */
+    fun onProAdWatched(): Boolean {
+        proAds = (proAds + 1).also { store.proAds = it }
+        if (proAds >= ADS_FOR_PRO) {
+            proUntil = System.currentTimeMillis() + PRO_HOURS * 3_600_000L
+            store.proUntil = proUntil
+            proAds = 0; store.proAds = 0
+            now = System.currentTimeMillis()
+            return true
+        }
+        return false
+    }
+
+    /** False when the free limit is used up (then the limit dialog is shown instead). */
+    fun mayGenerate(): Boolean {
+        refreshDay()
+        if (isPro || freeLeft > 0) return true
+        showLimit = true
+        return false
+    }
+
     var loading by mutableStateOf(false)
         private set
     var result by mutableStateOf<SeoResult?>(null)
         private set
-    var ideasUnlocked by mutableStateOf(false)
     private var titleSeed = 0
 
     val history = mutableStateListOf<SeoResult>().apply { addAll(store.loadHistory()) }
@@ -63,13 +120,16 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         job?.cancel()
         loading = true
         result = null
-        ideasUnlocked = false
         titleSeed = 0
         showResult = true
         val p = platform
+        val pro = isPro
+        if (!pro) {
+            freeUsed += 1; store.freeUsed = freeUsed
+        }
         job = viewModelScope.launch {
             val (weights, online) = Suggest.collect(kw, lang, country, p)
-            val r = SeoEngine.build(kw, weights, online, lang, country, p)
+            val r = SeoEngine.build(kw, weights, online, lang, country, p, pro)
             result = r
             loading = false
             store.generations = store.generations + 1
@@ -85,7 +145,6 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         keyword = r.keyword
         setPlatformTo(r.platform)
         loading = false
-        ideasUnlocked = false
         titleSeed = 0
         showResult = true
     }

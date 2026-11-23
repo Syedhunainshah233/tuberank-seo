@@ -28,6 +28,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
+import com.syedtechdevelopers.tuberankseo.ui.LimitDialog
+import com.syedtechdevelopers.tuberankseo.ui.ProDialog
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.syedtechdevelopers.tuberankseo.ads.Ads
@@ -65,10 +69,19 @@ class MainActivity : ComponentActivity() {
 fun App(vm: AppViewModel) {
     val ctx = LocalContext.current
     val generate = {
-        // Results start loading straight away; the interstitial plays on top of the loading screen.
-        vm.generate()
-        Ads.onGenerate(ctx.findActivity()) { }
+        if (vm.mayGenerate()) {
+            // Results start loading straight away; the interstitial plays on top of the loading screen.
+            vm.generate()
+            Ads.onGenerate(ctx.findActivity()) { }
+        }
     }
+    LaunchedEffect(Unit) {
+        while (true) {
+            vm.refreshDay(); delay(30_000)
+        }
+    }
+    if (vm.showLimit) LimitDialog(vm)
+    if (vm.showPro) ProDialog(vm)
     Column(
         Modifier
             .fillMaxSize()
