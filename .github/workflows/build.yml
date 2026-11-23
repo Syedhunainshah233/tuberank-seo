@@ -1,0 +1,99 @@
+name: Build TubeRank SEO APK
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore: [ 'docs/**', 'README.md' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        env:
+          KEYSTORE_BASE64: ${{ secrets.TUBERANK_KEYSTORE_BASE64 }}
+          TUBERANK_KEYSTORE_PASSWORD: ${{ secrets.TUBERANK_KEYSTORE_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          mkdir -p out
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Release key found: signed release + Play Store bundle"
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
+            export TUBERANK_KEYSTORE="$RUNNER_TEMP/upload.jks"
+            ./gradlew :app:assembleRelease :app:bundleRelease --stacktrace
+            cp app/build/outputs/apk/release/app-release.apk out/TubeRankSEO.apk
+            cp app/build/outputs/bundle/release/app-release.aab out/TubeRankSEO-playstore.aab
+            echo "KIND=release" >> "$GITHUB_ENV"
+          else
+            echo "No release key: debug APK with test ads"
+            ./gradlew :app:assembleDebug --stacktrace
+            cp app/build/outputs/apk/debug/app-debug.apk out/TubeRankSEO.apk
+            echo "KIND=debug" >> "$GITHUB_ENV"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TubeRankSEO-build
+          path: out/
+
+      - name: Publish download link
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          VERSION=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          if [ "$KIND" = "release" ]; then
+            NOTES="TubeRank SEO $VERSION (${GITHUB_SHA::7}). TubeRankSEO.apk: install on a phone. TubeRankSEO-playstore.aab: upload to Google Play Console."
+          else
+            NOTES="TubeRank SEO $VERSION (${GITHUB_SHA::7}), test-ads build. Download TubeRankSEO.apk on your phone and open it to install."
+          fi
+          gh release create latest out/* --title "TubeRank SEO $VERSION" --notes "$NOTES" --latest
+
+  screenshots:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Run tests
+        id: tests
+        continue-on-error: true
+        run: chmod +x gradlew && ./gradlew :app:testDebugUnitTest --stacktrace
+
+      - name: Save screenshots and test report to the 'screenshots' branch
+        if: always()
+        run: |
+          mkdir -p /tmp/out/screens /tmp/out/report
+          cp app/build/screens/* /tmp/out/screens/ 2>/dev/null || true
+          cp -r app/build/reports/tests/testDebugUnitTest/. /tmp/out/report/ 2>/dev/null || true
+          cp -r app/build/test-results/testDebugUnitTest/. /tmp/out/report/xml/ 2>/dev/null || true
+          echo "tests: ${{ steps.tests.outcome }} @ ${GITHUB_SHA::7}" > /tmp/out/STATUS.txt
+          git config user.name "tuberank-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout --orphan screenshots
+          git rm -rfq . || true
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r /tmp/out/. .
+          git add -A
+          git commit -qm "Screenshots for ${GITHUB_SHA::7}"
+          git push -f origin screenshots
