@@ -74,10 +74,10 @@ fun PlanCard(vm: AppViewModel) {
         ) {
             Column(Modifier.weight(1f)) {
                 Text(
-                    "Free: ${vm.freeLeft}/${AppViewModel.FREE_PER_DAY} generations left today",
+                    "Free: ${vm.freeLeft}/${AppViewModel.FREE_PER_DAY} left today",
                     fontWeight = FontWeight.Bold, fontSize = 14.sp,
                 )
-                Text("Basic SEO (about 50% optimized)", color = C.muted, fontSize = 12.sp)
+                Text("Basic SEO 50–60/100 • PRO = 100/100", color = C.muted, fontSize = 12.sp)
             }
             Box(
                 Modifier

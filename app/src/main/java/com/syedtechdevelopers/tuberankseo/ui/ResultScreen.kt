@@ -192,7 +192,6 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
 
     Column(Modifier.fillMaxSize()) {
         ScoreCard(r)
-        if (!r.pro) Box(Modifier.padding(horizontal = 16.dp)) { PlanCard(vm) }
         ScrollableTabRow(
             selectedTabIndex = tab,
             edgePadding = 12.dp,
@@ -216,6 +215,7 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (!r.pro) PlanCard(vm)
             when (tab) {
                 0 -> {
                     r.titles.forEachIndexed { i, t ->
