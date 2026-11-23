@@ -12,6 +12,7 @@ import java.io.File
 
 /** Checks every platform's limits, and writes a live sample to build/screens/live-sample.txt. */
 @RunWith(RobolectricTestRunner::class)
+@org.robolectric.annotation.Config(sdk = [34])
 class EngineTest {
 
     private fun fake(kw: String): Map<String, Double> {

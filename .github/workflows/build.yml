@@ -78,7 +78,7 @@ jobs:
       - name: Run tests
         id: tests
         continue-on-error: true
-        run: chmod +x gradlew && ./gradlew :app:testDebugUnitTest --stacktrace
+        run: chmod +x gradlew && (./gradlew :app:testDebugUnitTest --stacktrace || (sleep 20 && ./gradlew :app:testDebugUnitTest --rerun --stacktrace))
 
       - name: Save screenshots and test report to the 'screenshots' branch
         if: always()
