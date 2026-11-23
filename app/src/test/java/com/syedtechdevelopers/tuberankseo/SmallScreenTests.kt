@@ -31,6 +31,25 @@ class SmallScreenTests {
         }
     }
 
+    @Before
+    fun freshState() {
+        rule.runOnUiThread {
+            val vm = rule.activity.vm
+            vm.store.freeUsed = 0; vm.store.freeDay = ""; vm.store.proUntil = 0L
+            vm.refreshDay()
+        }
+    }
+
+    @org.junit.After
+    fun clearPrefs() {
+        rule.activity.getSharedPreferences("tuberank", android.content.Context.MODE_PRIVATE).edit().clear().commit()
+    }
+
+    private fun skipLogin() {
+        rule.waitForIdle()
+        if (rule.onAllNodesWithText("Skip for now").fetchSemanticsNodes().isNotEmpty()) click("Skip for now")
+    }
+
     private fun shot(name: String) {
         rule.waitForIdle()
         captureScreenRoboImage("build/screens/$name.png")
@@ -49,7 +68,7 @@ class SmallScreenTests {
     @Test
     fun walkThrough320() {
         shot("s320_00_welcome")
-        click("Skip for now")
+        skipLogin()
         shot("s320_01_home")
         rule.onAllNodes(hasSetTextAction())[0].performTextInput("chicken biryani")
         click("⚡ Generate", substring = true)

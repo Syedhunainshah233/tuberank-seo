@@ -31,6 +31,25 @@ class ScreenshotTests {
         }
     }
 
+    @Before
+    fun freshState() {
+        rule.runOnUiThread {
+            val vm = rule.activity.vm
+            vm.store.freeUsed = 0; vm.store.freeDay = ""; vm.store.proUntil = 0L
+            vm.refreshDay()
+        }
+    }
+
+    @org.junit.After
+    fun clearPrefs() {
+        rule.activity.getSharedPreferences("tuberank", android.content.Context.MODE_PRIVATE).edit().clear().commit()
+    }
+
+    private fun skipLogin() {
+        rule.waitForIdle()
+        if (rule.onAllNodesWithText("Skip for now").fetchSemanticsNodes().isNotEmpty()) click("Skip for now")
+    }
+
     private fun shot(name: String) {
         rule.waitForIdle()
         captureScreenRoboImage("build/screens/$name.png")
@@ -49,7 +68,7 @@ class ScreenshotTests {
     @Test
     fun walkThrough() {
         shot("00_welcome_login")
-        click("Skip for now")
+        skipLogin()
         shot("01_home_youtube")
         click("👑 Get PRO", substring = true); shot("01b_pro_dialog")
         click("Close")
