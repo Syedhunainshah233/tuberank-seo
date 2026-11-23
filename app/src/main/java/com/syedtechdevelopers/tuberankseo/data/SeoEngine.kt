@@ -277,7 +277,8 @@ object SeoEngine {
     }
 
     private fun rotate(templates: List<String>, min: Int, max: Int, seed: Int, fallback: String): List<String> {
-        val pool = templates.map { it.replace(Regex("\\s+"), " ").trim() }.filter { it.length in min..max }.distinct()
+        // "Tips Tips" -> "Tips" when the keyword already ends with the template word.
+        val pool = templates.map { it.replace(Regex("\\s+"), " ").trim().replace(Regex("(?i)\\b(\\w+) \\1\\b"), "$1") }.filter { it.length in min..max }.distinct()
         if (pool.isEmpty()) return listOf(fallback.take(max))
         val start = (seed * 7) % pool.size
         return (pool.drop(start) + pool.take(start)).take(12)
