@@ -104,7 +104,7 @@ fun HomeScreen(vm: AppViewModel, onGenerate: () -> Unit) {
                     value = vm.keyword,
                     onValueChange = { if (it.length <= 80) vm.keyword = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("e.g. how to make biryani") },
+                    placeholder = { Text("e.g. biryani recipe", maxLines = 1) },
                     leadingIcon = { Icon(Icons.Filled.Search, null, tint = C.muted) },
                     trailingIcon = {
                         if (vm.keyword.isNotEmpty()) {

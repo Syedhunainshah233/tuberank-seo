@@ -4,6 +4,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureScreenRoboImage
@@ -57,7 +58,9 @@ class SmallScreenTests {
 
     private fun click(text: String, substring: Boolean = false) {
         rule.waitForIdle()
-        rule.onAllNodesWithText(text, substring = substring)[0].performClick()
+        val node = rule.onAllNodesWithText(text, substring = substring)[0]
+        runCatching { node.performScrollTo() }
+        node.performClick()
         rule.waitForIdle()
     }
 
