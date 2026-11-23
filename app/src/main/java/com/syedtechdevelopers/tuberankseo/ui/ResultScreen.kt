@@ -10,6 +10,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -97,6 +99,10 @@ fun ResultScreen(vm: AppViewModel) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = { vm.showResult = false }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back") }
+            androidx.compose.foundation.Image(
+                androidx.compose.ui.res.painterResource((r?.platform ?: vm.platform).icon()), null,
+                Modifier.padding(end = 10.dp).size(26.dp),
+            )
             Text(
                 vm.keyword.ifBlank { r?.keyword.orEmpty() },
                 fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 1, modifier = Modifier.weight(1f),
@@ -262,7 +268,7 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         Spacer(Modifier.height(10.dp))
                         Chips(r.hashtags) { ctx.copy("Hashtag", it) }
                     }
-                    if (!r.pro) ProUpsell(vm, "All ${p.maxHashtags} best hashtags")
+                    if (!r.pro && p.maxHashtags > r.hashtags.size) ProUpsell(vm, "Up to ${p.maxHashtags} best hashtags")
                     Hint(
                         when (p) {
                             Platform.YouTube -> "The first 3 hashtags appear above your video title. Never use more than 15."
@@ -281,9 +287,9 @@ private fun Results(vm: AppViewModel, r: SeoResult) {
                         Spacer(Modifier.height(8.dp))
                         r.checklist().forEach { c ->
                             Row(Modifier.padding(vertical = 5.dp), verticalAlignment = Alignment.Top) {
-                                Text(if (c.ok) "✅" else "⚠️")
+                                Text(if (c.ok) "✅" else "❌")
                                 Spacer(Modifier.width(10.dp))
-                                Text(c.text, fontSize = 14.sp, color = if (c.ok) C.text else C.yellow)
+                                Text(c.text, fontSize = 14.sp, color = if (c.ok) C.green else C.red)
                             }
                         }
                     }
@@ -327,41 +333,61 @@ private fun Ideas(vm: AppViewModel, r: SeoResult) {
     }
 }
 
+/** Green with border for the best values, red for the rest. */
+@Composable
+fun ScorePill(text: String, good: Boolean) {
+    val c = if (good) C.green else C.red
+    Box(
+        Modifier
+            .clip(RoundedCornerShape(50))
+            .background(c.copy(alpha = 0.16f))
+            .border(1.dp, c, RoundedCornerShape(50))
+            .padding(horizontal = 9.dp, vertical = 3.dp),
+    ) { Text(text, color = c, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1) }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ScoreCard(r: SeoResult) {
-    val anim by animateFloatAsState(r.score / 100f, tween(900), label = "score")
-    val color = when {
-        r.score >= 70 -> C.green
-        r.score >= 45 -> C.yellow
-        else -> C.red
-    }
+    val score = r.optimization
+    val anim by animateFloatAsState(score / 100f, tween(900), label = "score")
+    val good = score >= 80
+    val color = if (good) C.green else C.red
     Card(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(76.dp), contentAlignment = Alignment.Center) {
-                Canvas(Modifier.fillMaxSize()) {
-                    val sw = 9.dp.toPx()
+            Box(
+                Modifier
+                    .size(78.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.12f))
+                    .border(2.dp, color.copy(alpha = 0.7f), CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Canvas(Modifier.fillMaxSize().padding(6.dp)) {
+                    val sw = 7.dp.toPx()
                     val s = Size(size.width - sw, size.height - sw)
                     val o = Offset(sw / 2, sw / 2)
                     drawArc(C.card2, -90f, 360f, false, o, s, style = Stroke(sw))
                     drawArc(color, -90f, 360f * anim, false, o, s, style = Stroke(sw, cap = StrokeCap.Round))
                 }
-                Text(if (r.online) "${r.score}" else "–", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
-            }
-            Spacer(Modifier.width(16.dp))
-            Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("SEO Score", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Spacer(Modifier.width(8.dp))
-                    Pill(if (r.pro) "👑 PRO ${r.optimization}%" else "Basic ${r.optimization}%", if (r.pro) GOLD else C.muted)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("$score", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold, color = color, lineHeight = 22.sp)
+                    Text("/100", fontSize = 10.sp, color = C.muted, lineHeight = 10.sp)
                 }
+            }
+            Spacer(Modifier.width(14.dp))
+            Column(Modifier.weight(1f)) {
+                Text("SEO Score", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Pill("Search: ${r.volume}", C.green)
-                    Pill("Competition: ${r.competition}", if (r.competition == "Low") C.green else C.yellow)
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    ScorePill(if (r.pro) "👑 PRO" else "Basic", r.pro)
+                    ScorePill("Search: ${r.volume}", r.volume == "High")
+                    ScorePill("Competition: ${r.competition}", r.competition == "Low")
                 }
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    if (r.online) "Estimated from live search data" else "Offline – connect to internet for live data",
+                    if (!r.online) "Offline – connect to internet for live data"
+                    else if (r.pro) "Full SEO pack • based on live search data" else "Free = Basic SEO. Get PRO for 100/100",
                     color = C.muted, fontSize = 11.sp,
                 )
             }
@@ -385,7 +411,7 @@ private fun CopyRow(text: String, meta: String?, badge: String?, onCopy: () -> U
             if (meta != null || badge != null) {
                 Spacer(Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    badge?.let { Pill(it, C.green) }
+                    badge?.let { ScorePill(it, true) }
                     meta?.let { Text(it, color = C.muted, fontSize = 12.sp) }
                 }
             }

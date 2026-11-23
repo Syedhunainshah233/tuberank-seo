@@ -150,7 +150,13 @@ fun HomeScreen(vm: AppViewModel, onGenerate: () -> Unit) {
                                     .background(C.card2)
                                     .clickable { vm.open(r) }
                                     .padding(horizontal = 12.dp, vertical = 7.dp),
-                            ) { Text("${r.platform.emoji} ${r.keyword}", fontSize = 13.sp, maxLines = 1) }
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Image(painterResource(r.platform.icon()), r.platform.label, Modifier.size(16.dp))
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(r.keyword, fontSize = 13.sp, maxLines = 1)
+                                }
+                            }
                         }
                     }
                 }
@@ -245,7 +251,8 @@ fun PlatformTabs(selected: Platform, onPick: (Platform) -> Unit) {
                     .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(p.emoji, fontSize = 18.sp)
+                Image(painterResource(p.icon()), p.label, Modifier.size(30.dp))
+                Spacer(Modifier.height(4.dp))
                 Text(
                     p.label, fontSize = 11.sp, maxLines = 1,
                     fontWeight = if (on) FontWeight.Bold else FontWeight.Normal,

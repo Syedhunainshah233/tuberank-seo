@@ -6,10 +6,11 @@ data class Check(val ok: Boolean, val text: String)
 
 /**
  * Per-platform rules (2026):
- *  YouTube   – title ≤ 100 (≤ 70 shows fully), tags box 500 chars, ≤ 15 hashtags (first 3 above title)
- *  TikTok    – caption 2,200 chars, only the first ~100 show in the feed; 3–5 hashtags work best
+ *  YouTube   – title ≤ 100 (≤ 70 shows fully), tags box 500 chars, max 15 hashtags
+ *              (with more than 15 YouTube ignores ALL hashtags on the video)
+ *  TikTok    – caption 2,200 chars, only the first ~100 show in the feed; up to 20 hashtags
  *  Instagram – caption 2,200 chars, ~125 show before "more"; hard limit of 5 hashtags per post/reel
- *  Facebook  – long posts allowed, ~80 chars show before "See more"; 3–5 hashtags
+ *  Facebook  – long posts allowed, ~80 chars show before "See more"; up to 20 hashtags
  */
 enum class Platform(
     val label: String,
@@ -22,9 +23,9 @@ enum class Platform(
     val maxHashtags: Int,
 ) {
     YouTube("YouTube", "▶️", "Titles", 70, "Description", 5000, "Tags", 15),
-    TikTok("TikTok", "🎵", "Hooks", 100, "Caption", 2200, "Keywords", 5),
+    TikTok("TikTok", "🎵", "Hooks", 100, "Caption", 2200, "Keywords", 20),
     Instagram("Instagram", "📸", "Hooks", 125, "Caption", 2200, "Keywords", 5),
-    Facebook("Facebook", "📘", "Headlines", 80, "Post", 5000, "Keywords", 5),
+    Facebook("Facebook", "📘", "Headlines", 80, "Post", 5000, "Keywords", 20),
     ;
 
     companion object {
@@ -70,14 +71,14 @@ data class SeoResult(
                 list += Check(description.length >= 800, "Description is ${description.length} characters (800+ recommended)")
                 list += Check(description.lowercase().take(160).contains(kw), "Keyword in the first 2 lines of the description")
                 list += Check(tagsChars in 200..500, "Tags use $tagsChars/500 characters")
-                list += Check(hashtags.size in 3..15, "${hashtags.size} hashtags (3–15, first 3 show above the title)")
+                list += Check(hashtags.size in 5..15, "${hashtags.size} hashtags (5–15, first 3 show above the title)")
                 list += Check(description.contains("00:00"), "Chapters / timestamps in the description")
                 list += Check(description.contains("Related searches"), "Related search phrases in the description")
             }
             else -> {
                 list += Check(description.length <= p.textMax, "${p.textName} is ${description.length}/${p.textMax} characters")
                 list += Check(description.lowercase().take(p.headlineMax).contains(kw), "Keyword in the first line people see")
-                list += Check(hashtags.size in 3..p.maxHashtags, "${hashtags.size} hashtags (max ${p.maxHashtags} on ${p.label})")
+                list += Check(hashtags.size in minOf(5, p.maxHashtags)..p.maxHashtags, "${hashtags.size} hashtags (max ${p.maxHashtags} on ${p.label})")
                 list += Check(tags.size >= 10, "${tags.size} search keywords to say in your video / on-screen text")
                 list += Check(description.contains("✨"), "Keyword-rich points in the ${p.textName.lowercase()}")
                 list += Check(description.contains("➕") || description.contains("👍"), "Call to action (follow, save, share)")
@@ -214,7 +215,7 @@ object SeoEngine {
             if (chars + add > 150 || (r.platform != Platform.YouTube && tags.size >= 5)) break
             tags += t; chars += add
         }
-        val hashtags = r.hashtags.take(3)
+        val hashtags = r.hashtags.take(5)
         val first = r.titles.first()
         val text = if (r.platform == Platform.YouTube) {
             "$first\n\nIn this video you will learn ${r.keyword} step by step. " +
@@ -348,10 +349,13 @@ object SeoEngine {
         val cands = mutableListOf(camel(kw))
         cands += relevant.take(8).map { camel(it) }
         cands += kw.split(" ").filter { it.length > 3 && it !in stopWords }.map { camel(it) }
-        cands += mods.take(5).map { camel(it) }
+        cands += mods.take(10).map { camel(it) }
+        cands += relevant.drop(8).take(20).map { camel(it) }
+        cands += mods.take(6).map { camel("$kw $it") }
+        cands += listOf(camel("$kw $year"), camel("$kw tips"), camel("$kw ideas"), "Trending", "Viral")
         when (platform) {
             Platform.YouTube -> if (kw.contains("short")) cands.add(1, "Shorts")
-            Platform.TikTok -> cands.add(1, "FYP")
+            Platform.TikTok -> cands.addAll(1, listOf("FYP", "ForYou"))
             Platform.Instagram -> cands.add(1, "Reels")
             Platform.Facebook -> {}
         }
@@ -360,41 +364,52 @@ object SeoEngine {
 
     fun description(keyword: String, title: String, relevant: List<String>, hashtags: List<String>, lang: String): String {
         val k = titleCase(keyword)
-        val s = relevant.take(12)
-        val learn = s.take(5).joinToString("\n") { "✅ ${titleCase(it)}" }
-        val related = s.take(10).joinToString(", ")
+        val s = relevant.take(20)
+        val learn = s.take(8).joinToString("\n") { "✅ ${titleCase(it)}" }
+        val related = s.take(15).joinToString(", ")
         val also = s.take(3).joinToString(", ").ifBlank { keyword }
+        val more = s.drop(3).take(3).joinToString(", ").ifBlank { "$keyword tips" }
+        val faq = s.filter { it.startsWith("how ") || it.startsWith("what ") || it.startsWith("why ") || it.startsWith("can ") }
+            .take(3).ifEmpty { listOf("how to $keyword", "what is the best way to $keyword", "is $keyword easy for beginners") }
         val urdu = if (urduish(lang)) {
-            "\n\nIs video mein hum $keyword ko asaan alfaaz mein step by step samjhenge. Video aakhir tak zaroor dekhein!"
+            "\n\nIs video mein hum $keyword ko asaan alfaaz mein step by step samjhenge. Agar aap $also dhoond rahe hain to yeh video aap ke liye hai. Video aakhir tak zaroor dekhein!"
         } else ""
         return buildString {
             append(title).append("\n\n")
             append("In this video you will learn $keyword step by step. Whether you are searching for $also, this video covers everything you need to know about $keyword – from the basics to pro tips that really work in $year.")
+            append(" We also cover $more, so beginners and experienced viewers can both follow along easily.")
             append(urdu)
-            append("\n\n👉 What you will learn:\n").append(learn)
-            append("\n\n⏱️ Timestamps:\n00:00 Intro\n00:30 What is $k?\n02:00 Step by step\n05:00 Tips & common mistakes\n08:00 Final result & conclusion\n(Edit the timestamps to match your video)")
-            append("\n\n🔔 Subscribe and turn on notifications for more videos about $keyword.\n👍 Like  💬 Comment  🔁 Share with a friend who needs this!")
+            append("\n\n👉 What you will learn in this video:\n").append(learn)
+            append("\n\n💡 Why watch this video?\nMost $keyword videos skip the small details that make the biggest difference. Here you get a clear, simple and complete $keyword guide with real examples, common mistakes to avoid and tips you can use today.")
+            append("\n\n⏱️ Timestamps:\n00:00 Intro\n00:30 What is $k?\n01:30 What you need\n02:30 Step by step\n05:00 Pro tips\n07:00 Common mistakes\n08:30 Final result & conclusion\n(Edit the timestamps to match your video)")
+            append("\n\n❓ Frequently asked questions:\n")
+            faq.forEach { q -> append("• ${titleCase(q).trimEnd('?')}? – Watch the full video, we answer it step by step.\n") }
+            append("\n🔔 Subscribe and turn on notifications for more videos about $keyword.\n👍 Like  💬 Comment your questions  🔁 Share with a friend who needs this!")
+            append("\n\n📌 Watch next: more $keyword videos on this channel.")
             append("\n\n🔎 Related searches:\n").append(related)
-            append("\n\n").append(hashtags.take(10).joinToString(" "))
+            append("\n\n").append(hashtags.joinToString(" "))
         }
     }
 
     /** Caption for TikTok / Instagram / Facebook: hook first, keywords in natural sentences, CTA, hashtags. */
     fun caption(platform: Platform, keyword: String, hook: String, relevant: List<String>, hashtags: List<String>, lang: String): String {
-        val s = relevant.take(6)
+        val s = relevant.take(10)
         val also = s.take(3).joinToString(", ").ifBlank { keyword }
-        val urdu = if (urduish(lang)) "\nPoori video dekhein aur apni raaye comment mein batayein! 👇" else ""
+        val urdu = if (urduish(lang)) "\n\nPoori video dekhein aur apni raaye comment mein batayein! 👇" else ""
+        val first = keyword.split(" ").first().uppercase()
         val cta = when (platform) {
-            Platform.TikTok -> "💬 Comment \"${keyword.split(" ").first().uppercase()}\" if you want part 2!\n➕ Follow for more $keyword tips."
-            Platform.Instagram -> "📌 Save this post for later & share it with a friend.\n➕ Follow for more $keyword ideas."
-            else -> "👍 Like & share if this helped you!\n💬 Tell us in the comments: what should we post next?"
+            Platform.TikTok -> "💬 Comment \"$first\" if you want part 2!\n➕ Follow for more $keyword tips every day.\n🔁 Share this with someone who needs it."
+            Platform.Instagram -> "📌 Save this post so you don't lose it.\n📤 Share it with a friend who loves $keyword.\n➕ Follow for more $keyword ideas."
+            else -> "👍 Like & share if this helped you!\n💬 Tell us in the comments: what should we post next?\n➕ Follow the page for more $keyword content."
         }
-        val points = s.take(if (platform == Platform.Facebook) 5 else 3).joinToString("\n") { "✨ ${titleCase(it)}" }
+        val points = s.take(if (platform == Platform.Facebook) 7 else 5).joinToString("\n") { "✨ ${titleCase(it)}" }
         return buildString {
             append(hook).append("\n\n")
-            append("Everything about $keyword in one place – $also and more.")
+            append("Everything you need to know about $keyword in one place – $also and more. ")
+            append("Simple steps, real results and tips that actually work in $year.")
             append(urdu)
-            append("\n\n").append(points)
+            append("\n\nIn this ${if (platform == Platform.Facebook) "post" else "video"}:\n").append(points)
+            append("\n\n❓ Which tip will you try first? Let me know below 👇")
             append("\n\n").append(cta)
             append("\n\n").append(hashtags.joinToString(" "))
         }

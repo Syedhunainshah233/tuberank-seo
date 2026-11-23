@@ -27,7 +27,7 @@ class ScreenshotTests {
     fun fakeNetwork() {
         Suggest.fetcher = { q, _, _, _ ->
             val base = q.trim()
-            listOf(base, "$base recipe", "$base easy", "$base at home", "$base in urdu", "$base step by step", "best $base", "$base masala")
+            listOf(base, "$base recipe", "$base easy", "$base at home", "$base in urdu", "$base step by step", "best $base", "$base masala", "how to make $base", "$base spicy")
         }
     }
 
@@ -48,6 +48,8 @@ class ScreenshotTests {
 
     @Test
     fun walkThrough() {
+        shot("00_welcome_login")
+        click("Skip for now")
         shot("01_home_youtube")
         click("👑 Get PRO", substring = true); shot("01b_pro_dialog")
         click("Close")

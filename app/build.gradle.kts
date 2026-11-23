@@ -20,6 +20,13 @@ android {
     val releaseKeystore = System.getenv("TUBERANK_KEYSTORE")
 
     signingConfigs {
+        // Fixed test key so the SHA-1 registered in Google Cloud stays the same on every build.
+        getByName("debug") {
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
         if (releaseKeystore != null) {
             create("release") {
                 storeFile = file(releaseKeystore)
@@ -98,6 +105,10 @@ dependencies {
     implementation("androidx.compose.animation:animation")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-core")
+
+    // Google sign-in (name, email, photo) via Google Identity Services
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 
     // AdMob + consent (GDPR) form
     implementation("com.google.android.gms:play-services-ads:23.5.0")

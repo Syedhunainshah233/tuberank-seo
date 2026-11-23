@@ -28,7 +28,7 @@ class EngineTest {
         for (p in Platform.entries) {
             val r = SeoEngine.build("chicken biryani", fake("chicken biryani"), true, "ur", "PK", p)
             assertTrue("$p headlines", r.titles.isNotEmpty() && r.titles.all { it.length <= p.headlineMax })
-            assertTrue("$p hashtags ${r.hashtags}", r.hashtags.size in 3..p.maxHashtags)
+            assertTrue("$p hashtags ${r.hashtags}", r.hashtags.size in minOf(5, p.maxHashtags)..p.maxHashtags)
             assertTrue("$p text", r.description.length <= p.textMax)
             assertTrue("$p no platform words in hashtags", r.hashtags.none { it.contains("tiktok", true) })
             if (p == Platform.YouTube) assertTrue("tags ${r.tagsChars}", r.tagsChars <= 500)
@@ -44,8 +44,10 @@ class EngineTest {
             val pro = SeoEngine.build("chicken biryani", w, true, "en", "PK", p, pro = true)
             val basic = SeoEngine.build("chicken biryani", w, true, "en", "PK", p, pro = false)
             assertTrue("$p pro ${pro.optimization} ${pro.checklist()}", pro.optimization == 100)
-            assertTrue("$p basic ${basic.optimization} ${basic.checklist()}", basic.optimization in 40..60)
-            assertTrue(basic.titles.size == 3 && basic.hashtags.size <= 3)
+            assertTrue("$p basic ${basic.optimization} ${basic.checklist()}", basic.optimization in 50..60)
+            assertTrue(basic.titles.size == 3 && basic.hashtags.size == 5)
+            if (p == Platform.YouTube) assertTrue("long description ${pro.description.length}", pro.description.length >= 1800)
+            if (p != Platform.Instagram) assertTrue("$p pro hashtags ${pro.hashtags.size}", pro.hashtags.size >= 10)
         }
     }
 

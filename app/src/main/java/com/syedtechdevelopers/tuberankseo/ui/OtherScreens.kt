@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -84,8 +85,12 @@ fun HistoryScreen(vm: AppViewModel) {
                             .padding(start = 14.dp, top = 10.dp, bottom = 10.dp, end = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
+                        androidx.compose.foundation.Image(
+                            androidx.compose.ui.res.painterResource(r.platform.icon()), r.platform.label,
+                            Modifier.padding(end = 12.dp).size(30.dp),
+                        )
                         Column(Modifier.weight(1f)) {
-                            Text("${r.platform.emoji} ${r.keyword}", fontWeight = FontWeight.SemiBold, maxLines = 1)
+                            Text(r.keyword, fontWeight = FontWeight.SemiBold, maxLines = 1)
                             Text(
                                 "Score ${if (r.online) r.score else "–"} • ${r.tags.size} tags • ${fmt.format(Date(r.createdAt))}",
                                 color = C.muted, fontSize = 12.sp,
@@ -120,6 +125,7 @@ fun SettingsScreen(vm: AppViewModel) {
     ) {
         Title("Settings")
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            AccountCard(vm)
             Card {
                 Text("Defaults", fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(10.dp))
