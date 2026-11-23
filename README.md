@@ -17,8 +17,13 @@ Android app (Kotlin + Jetpack Compose) by **SyedTechdevelopers** that generates 
 | Rewarded interstitial | "More titles / hooks", after a 5 s intro with "No thanks" |
 | Native | Inside results, home and history |
 
-Ad unit IDs live in `app/build.gradle.kts` (debug = Google test ads). Replace the **release** IDs
-with your real ones from AdMob before publishing.
+Ad unit IDs live in `app/build.gradle.kts`: **debug** builds use Google test ads, **release**
+builds use the real TubeRank SEO units (App ID `ca-app-pub-8064134362670148~9344795441`).
+
+## Release (Play Store)
+Add two repository secrets (Settings → Secrets and variables → Actions):
+`TUBERANK_KEYSTORE_BASE64` and `TUBERANK_KEYSTORE_PASSWORD`. Every push then builds a signed
+`TubeRankSEO.apk` (real ads) and `TubeRankSEO-playstore.aab` for Play Console.
 
 ## Build
 Every push to `main` builds on GitHub Actions. Download the APK from the

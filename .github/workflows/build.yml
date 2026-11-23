@@ -38,7 +38,8 @@ jobs:
             echo "KIND=release" >> "$GITHUB_ENV"
           else
             echo "No release key: debug APK with test ads"
-            ./gradlew :app:assembleDebug --stacktrace
+            # Release is built too (unsigned) to check the real-ads build compiles.
+            ./gradlew :app:assembleDebug :app:assembleRelease --stacktrace
             cp app/build/outputs/apk/debug/app-debug.apk out/TubeRankSEO.apk
             echo "KIND=debug" >> "$GITHUB_ENV"
           fi

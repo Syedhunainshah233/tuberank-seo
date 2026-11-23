@@ -49,15 +49,14 @@ android {
             buildConfigField("String", "AD_NATIVE", "\"ca-app-pub-3940256099942544/2247696110\"")
         }
         release {
-            // TODO: replace with the real TubeRank SEO app ID + 6 ad unit IDs from AdMob
-            // (AdMob account pub-8064134362670148). Until then release builds show test ads.
-            manifestPlaceholders["admobAppId"] = "ca-app-pub-3940256099942544~3347511713"
-            buildConfigField("String", "AD_APP_OPEN", "\"ca-app-pub-3940256099942544/9257395921\"")
-            buildConfigField("String", "AD_BANNER", "\"ca-app-pub-3940256099942544/9214589741\"")
-            buildConfigField("String", "AD_INTERSTITIAL", "\"ca-app-pub-3940256099942544/1033173712\"")
-            buildConfigField("String", "AD_REWARDED", "\"ca-app-pub-3940256099942544/5224354917\"")
-            buildConfigField("String", "AD_REWARDED_INTERSTITIAL", "\"ca-app-pub-3940256099942544/5354046379\"")
-            buildConfigField("String", "AD_NATIVE", "\"ca-app-pub-3940256099942544/2247696110\"")
+            // Real TubeRank SEO ad units (AdMob account pub-8064134362670148).
+            manifestPlaceholders["admobAppId"] = "ca-app-pub-8064134362670148~9344795441"
+            buildConfigField("String", "AD_APP_OPEN", "\"ca-app-pub-8064134362670148/8794131106\"")
+            buildConfigField("String", "AD_BANNER", "\"ca-app-pub-8064134362670148/1466305423\"")
+            buildConfigField("String", "AD_INTERSTITIAL", "\"ca-app-pub-8064134362670148/2658686333\"")
+            buildConfigField("String", "AD_REWARDED", "\"ca-app-pub-8064134362670148/8139524983\"")
+            buildConfigField("String", "AD_REWARDED_INTERSTITIAL", "\"ca-app-pub-8064134362670148/9452606651\"")
+            buildConfigField("String", "AD_NATIVE", "\"ca-app-pub-8064134362670148/6826443316\"")
             if (releaseKeystore != null) signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
