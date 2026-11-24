@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5
+- Fix "isn't responding" (ANR): launch splash waits at most 3 s for the app open ad (was 7 s)
+- AdMob starts on a background thread; Google's OPTIMIZE_INITIALIZATION / OPTIMIZE_AD_LOADING flags on
+- Native ads are cached per screen and reused instead of reloading on every tab change
+
 ## 1.0.4
 - "More titles / hooks" now always adds brand-new titles at the top with a "New" badge and a message
 - Reward from the "More titles" ad is applied after the ad closes; a message explains when the ad was closed early

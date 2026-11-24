@@ -98,9 +98,9 @@ fun HistoryScreen(vm: AppViewModel) {
                         }
                         IconButton(onClick = { vm.deleteHistory(r) }) { Icon(Icons.Filled.Delete, "Delete", tint = C.muted) }
                     }
-                    if (i % 5 == 2) {
+                    if (i == 2 || i == 9) {
                         Spacer(Modifier.height(10.dp))
-                        NativeAdCard()
+                        NativeAdCard(slot = "history-$i")
                     }
                 }
             }

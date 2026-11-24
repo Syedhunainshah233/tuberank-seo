@@ -99,16 +99,22 @@ object Ads {
     private fun initSdk(activity: Activity) {
         if (initStarted) return
         initStarted = true
-        runCatching {
-            MobileAds.initialize(activity.applicationContext) {
-                ready = true
-                val ctx = activity.applicationContext
-                loadInterstitial(ctx)
-                loadAppOpen(ctx)
-                loadRewarded(ctx)
-                loadRewardedInterstitial(ctx)
-            }
-        }
+        val ctx = activity.applicationContext
+        val main = android.os.Handler(android.os.Looper.getMainLooper())
+        // Initialise on a background thread (Google's advice to avoid ANRs); ads load back on the main thread.
+        Thread {
+            runCatching {
+                MobileAds.initialize(ctx) {
+                    main.post {
+                        ready = true
+                        loadInterstitial(ctx)
+                        loadAppOpen(ctx)
+                        loadRewarded(ctx)
+                        loadRewardedInterstitial(ctx)
+                    }
+                }
+            }.onFailure { main.post { releaseSplash() } }
+        }.start()
     }
 
     private fun gapOk() = System.currentTimeMillis() - lastShownAt >= MIN_GAP_MS
@@ -270,7 +276,8 @@ object Ads {
 
     private const val APP_OPEN_MAX_AGE_MS = 4 * 60 * 60 * 1000L
     /** Longest the launch splash waits for the app open ad (first launch also starts the SDK). */
-    private const val LAUNCH_WAIT_MS = 7_000L
+    // Must stay well under Android's 5 s "isn't responding" limit: the splash blocks the first frame.
+    private const val LAUNCH_WAIT_MS = 3_000L
     private var appOpen: AppOpenAd? = null
     private var appOpenLoadedAt = 0L
     private var loadingAppOpen = false
@@ -391,20 +398,48 @@ fun BannerAd(modifier: Modifier = Modifier) {
 
 // ---------- 6. Native ----------
 
-@Composable
-fun NativeAdCard(modifier: Modifier = Modifier) {
-    if (!Ads.ready) return
-    val ctx = LocalContext.current
-    var ad by remember { mutableStateOf<NativeAd?>(null) }
-    DisposableEffect(Unit) {
-        var loaded: NativeAd? = null
-        val loader = AdLoader.Builder(ctx, BuildConfig.AD_NATIVE)
-            .forNativeAd { loaded = it; ad = it }
-            .withAdListener(object : AdListener() {})
+/**
+ * Native ads are cached per [slot] (home, results, history…) and reused for up to 30 minutes,
+ * instead of loading a fresh ad every time a tab is opened. Far fewer requests and WebViews,
+ * which keeps the main thread free (no "isn't responding").
+ */
+private object NativeCache {
+    private const val MAX_AGE_MS = 30 * 60 * 1000L
+    private val ads = HashMap<String, Pair<NativeAd, Long>>()
+    private val waiting = HashMap<String, MutableList<(NativeAd) -> Unit>>()
+
+    fun get(slot: String): NativeAd? = ads[slot]?.takeIf { System.currentTimeMillis() - it.second < MAX_AGE_MS }?.first
+
+    fun load(context: Context, slot: String, onLoaded: (NativeAd) -> Unit) {
+        get(slot)?.let { onLoaded(it); return }
+        val list = waiting.getOrPut(slot) { mutableListOf() }
+        list += onLoaded
+        if (list.size > 1) return // a request for this slot is already running
+        AdLoader.Builder(context, BuildConfig.AD_NATIVE)
+            .forNativeAd { ad ->
+                ads.put(slot, ad to System.currentTimeMillis())?.first?.destroy()
+                waiting.remove(slot)?.forEach { it(ad) }
+            }
+            .withAdListener(object : AdListener() {
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    waiting.remove(slot)
+                }
+            })
             .withNativeAdOptions(NativeAdOptions.Builder().build())
             .build()
-        loader.loadAd(AdRequest.Builder().build())
-        onDispose { loaded?.destroy() }
+            .loadAd(AdRequest.Builder().build())
+    }
+}
+
+@Composable
+fun NativeAdCard(modifier: Modifier = Modifier, slot: String = "main") {
+    if (!Ads.ready) return
+    val ctx = LocalContext.current
+    var ad by remember(slot) { mutableStateOf(NativeCache.get(slot)) }
+    DisposableEffect(slot) {
+        var active = true
+        if (ad == null) NativeCache.load(ctx.applicationContext, slot) { if (active) ad = it }
+        onDispose { active = false }
     }
     val current = ad ?: return
     AndroidView(

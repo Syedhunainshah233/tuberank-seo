@@ -245,7 +245,7 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
                             else -> null
                         }
                         CopyRow(t, "${t.length}/${p.headlineMax}", badge) { ctx.copy(p.headlineName.dropLast(1), t) }
-                        if (i == 3) NativeAdCard()
+                        if (i == 3) NativeAdCard(slot = "results")
                     }
                     if (!unlocked) LockedPreview(vm, "${full.titles.size} PRO ${p.headlineName.lowercase()}") {
                         full.titles.drop(3).take(6).forEach { t -> CopyRow(t, "${t.length}/${p.headlineMax}", null) {} }
@@ -265,7 +265,7 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
                     if (!unlocked) LockedPreview(vm, "Full ${p.textName.lowercase()} (${full.description.length} characters)") {
                         Card { Text(full.description, fontSize = 14.sp, lineHeight = 20.sp, maxLines = 18) }
                     }
-                    NativeAdCard()
+                    NativeAdCard(slot = "results")
                 }
 
                 2 -> {
@@ -287,7 +287,7 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
                         if (p == Platform.YouTube) "Paste all tags in the Tags box of your video. Remove any other channel or brand name that is not in your video."
                         else "${p.label} search reads your caption, on-screen text and what you say. Use these keywords in all three.",
                     )
-                    NativeAdCard()
+                    NativeAdCard(slot = "results")
                 }
 
                 3 -> {
@@ -309,7 +309,7 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
                             else -> "3–5 focused hashtags work better than many generic ones."
                         },
                     )
-                    NativeAdCard()
+                    NativeAdCard(slot = "results")
                 }
 
                 4 -> Ideas(vm, r, full, unlocked)
@@ -336,7 +336,7 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
                         Spacer(Modifier.height(8.dp))
                         tips(p).forEach { Text("• $it", color = C.muted, fontSize = 14.sp, modifier = Modifier.padding(vertical = 3.dp)) }
                     }
-                    NativeAdCard()
+                    NativeAdCard(slot = "results")
                 }
             }
             Spacer(Modifier.height(4.dp))
@@ -369,11 +369,11 @@ private fun Ideas(vm: AppViewModel, r: SeoResult, full: SeoResult, unlocked: Boo
         LockedPreview(vm, "${full.ideas.size} video ideas & long-tail keywords") {
             full.ideas.drop(3).take(8).forEach { CopyRow(it, null, null) {} }
         }
-        NativeAdCard()
+        NativeAdCard(slot = "results")
     } else {
         r.ideas.forEachIndexed { i, s ->
             CopyRow(s, null, null) { ctx.copy("Keyword", s) }
-            if (i == 5) NativeAdCard()
+            if (i == 5) NativeAdCard(slot = "results")
         }
     }
 }

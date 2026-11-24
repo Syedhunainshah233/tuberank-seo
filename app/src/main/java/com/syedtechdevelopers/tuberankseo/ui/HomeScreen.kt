@@ -136,7 +136,7 @@ fun HomeScreen(vm: AppViewModel, onGenerate: () -> Unit) {
                 )
             }
 
-            NativeAdCard()
+            NativeAdCard(slot = "home")
 
             if (vm.history.isNotEmpty()) {
                 Card {
