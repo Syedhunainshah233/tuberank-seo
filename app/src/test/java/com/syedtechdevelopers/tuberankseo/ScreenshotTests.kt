@@ -77,6 +77,10 @@ class ScreenshotTests {
         click("⚡ Generate", substring = true)
         waitFor("SEO Check")
         shot("02_result_titles")
+        click("More titles", substring = true)
+        click("Watch now")
+        rule.waitUntil(5_000) { rule.onAllNodesWithText("New").fetchSemanticsNodes().isNotEmpty() }
+        shot("02b_more_titles")
         click("Description"); shot("03_result_description")
         click("Tags"); shot("04_result_tags")
         click("Hashtags"); shot("05_result_hashtags")

@@ -240,6 +240,27 @@ object SeoEngine {
 
     private fun urduish(lang: String) = lang == "ur" || lang == "hi"
 
+    /**
+     * "More titles / hooks": up to 12 headlines that are NOT already in [r].titles.
+     * Mixes the searched phrases and modifiers differently each [round] so every tap gives new ones.
+     */
+    fun moreHeadlines(r: SeoResult, round: Int): List<String> {
+        val seen = r.titles.map { it.lowercase() }.toHashSet()
+        val ideas = r.ideas.map { it.lowercase() }
+        val mods = modifiers(r.keyword.lowercase(), ideas)
+        val rnd = java.util.Random(r.createdAt + round * 7919L)
+        val fresh = LinkedHashSet<String>()
+        for (attempt in 0 until 10) {
+            val rel = if (attempt == 0) ideas.drop(3) + ideas.take(3) else ideas.shuffled(rnd)
+            val m = if (attempt == 0) mods.drop(1) + mods.take(1) else mods.shuffled(rnd)
+            for (t in headlines(r.platform, r.keyword, rel, m, r.lang, round * 3 + attempt)) {
+                if (t.lowercase() !in seen) fresh += t
+            }
+            if (fresh.size >= 12) break
+        }
+        return fresh.take(12).toList()
+    }
+
     fun headlines(platform: Platform, keyword: String, relevant: List<String>, mods: List<String>, lang: String, seed: Int): List<String> =
         if (platform == Platform.YouTube) titles(keyword, relevant, mods, lang, seed)
         else hooks(platform, keyword, relevant, mods, lang, seed)
@@ -267,6 +288,14 @@ object SeoEngine {
             "Beginner to Pro: $k Masterclass",
             "Why Your $k Isn't Working (And How to Fix It)",
             "$k Hacks Everyone Should Know",
+            "$k: Everything You Need to Know",
+            "My Honest $k Review ($y)",
+            "$k – Do This Before You Start",
+            "5 Easy $k Ideas for Beginners",
+            "$k in Under 5 Minutes",
+            "The Right Way to Do $k",
+            "$k Tips the Pros Use",
+            "$k – Simple $m1 That Works",
         )
         if (urduish(lang)) {
             templates.add(2, "$k Kaise Karein? Sab Se Asaan Tareeqa ($y)")
@@ -297,6 +326,12 @@ object SeoEngine {
             "Easy $keyword anyone can do ✅",
             "Don't make this $keyword mistake ❌",
             "Save this for your next $keyword 📌",
+            "The $keyword trick you'll wish you knew sooner 😱",
+            "$k but make it easy ✨",
+            "Try this $keyword idea today 👇",
+            "Watch this before your next $keyword 🎯",
+            "$k level: expert 🔥",
+            "Don't skip this $keyword tip ⏭️",
         )
         if (platform == Platform.Facebook) {
             templates.add(0, "$k: the complete guide everyone is sharing")

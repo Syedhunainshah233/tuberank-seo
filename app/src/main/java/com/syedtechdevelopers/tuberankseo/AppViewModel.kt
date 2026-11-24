@@ -98,7 +98,6 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var result by mutableStateOf<SeoResult?>(null)
         private set
-    private var titleSeed = 0
 
     val history = mutableStateListOf<SeoResult>().apply { addAll(store.loadHistory()) }
 
@@ -120,7 +119,8 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         job?.cancel()
         loading = true
         result = null
-        titleSeed = 0
+        moreRound = 0
+        newTitles = emptySet()
         showResult = true
         val p = platform
         val pro = isPro
@@ -145,16 +145,30 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         keyword = r.keyword
         setPlatformTo(r.platform)
         loading = false
-        titleSeed = 0
+        moreRound = 0
+        newTitles = emptySet()
         showResult = true
     }
 
-    fun moreTitles() {
-        val r = result ?: return
-        titleSeed++
-        val mods = SeoEngine.modifiers(r.keyword.lowercase(), r.ideas.map { it.lowercase() })
-        val fresh = SeoEngine.headlines(r.platform, r.keyword, r.ideas.map { it.lowercase() }, mods.shuffled().ifEmpty { mods }, r.lang, titleSeed)
-        result = r.copy(titles = fresh)
+    /** Titles added by the last "More titles" tap; shown with a "New" badge. */
+    var newTitles by mutableStateOf(emptySet<String>())
+        private set
+    private var moreRound = 0
+
+    /** Adds brand-new titles/hooks at the top of the list. Returns how many were added. */
+    fun moreTitles(): Int {
+        val r = result ?: return 0
+        moreRound++
+        val fresh = SeoEngine.moreHeadlines(r, moreRound)
+        if (fresh.isEmpty()) return 0
+        val updated = r.copy(titles = (fresh + r.titles).distinct().take(36))
+        result = updated
+        newTitles = fresh.toSet()
+        val i = history.indexOfFirst { it.createdAt == r.createdAt && it.platform == r.platform }
+        if (i >= 0) {
+            history[i] = updated; store.saveHistory(history)
+        }
+        return fresh.size
     }
 
     fun deleteHistory(r: SeoResult) {

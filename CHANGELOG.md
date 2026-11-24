@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4
+- "More titles / hooks" now always adds brand-new titles at the top with a "New" badge and a message
+- Reward from the "More titles" ad is applied after the ad closes; a message explains when the ad was closed early
+
 ## 1.0.3
 - App open ad on launch: logo splash stays up while the ad loads (was dropped after 8 s on slow real-ad loads)
 

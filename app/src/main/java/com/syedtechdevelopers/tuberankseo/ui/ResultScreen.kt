@@ -46,6 +46,8 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -195,6 +197,17 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
     val p = r.platform
     val tabs = listOf(p.headlineName, p.textName, p.keywordsName, "Hashtags", "Ideas", "SEO Check")
     var askMoreTitles by remember { mutableStateOf(false) }
+    val scroll = rememberScrollState()
+    val scope = rememberCoroutineScope()
+    val addMore = {
+        val n = vm.moreTitles()
+        Toast.makeText(
+            ctx,
+            if (n > 0) "✨ $n new ${p.headlineName.lowercase()} added at the top" else "No more new ${p.headlineName.lowercase()} for this keyword",
+            Toast.LENGTH_SHORT,
+        ).show()
+        scope.launch { scroll.animateScrollTo(0) }
+    }
 
     Column(Modifier.fillMaxSize()) {
         ScrollableTabRow(
@@ -216,7 +229,7 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
         Column(
             Modifier
                 .weight(1f)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scroll)
                 .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -226,7 +239,12 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
             when (tab) {
                 0 -> {
                     r.titles.forEachIndexed { i, t ->
-                        CopyRow(t, "${t.length}/${p.headlineMax}", if (i == 0) "Best" else null) { ctx.copy(p.headlineName.dropLast(1), t) }
+                        val badge = when {
+                            t in vm.newTitles -> "New"
+                            i == 0 && vm.newTitles.isEmpty() -> "Best"
+                            else -> null
+                        }
+                        CopyRow(t, "${t.length}/${p.headlineMax}", badge) { ctx.copy(p.headlineName.dropLast(1), t) }
                         if (i == 3) NativeAdCard()
                     }
                     if (!unlocked) LockedPreview(vm, "${full.titles.size} PRO ${p.headlineName.lowercase()}") {
@@ -332,7 +350,12 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
             onSkip = { askMoreTitles = false },
             onWatch = {
                 askMoreTitles = false
-                Ads.showRewardedInterstitial(ctx.findActivity()) { vm.moreTitles() }
+                Ads.showRewardedInterstitial(
+                    ctx.findActivity(),
+                    onNotEarned = {
+                        Toast.makeText(ctx, "Watch the full ad to get new ${p.headlineName.lowercase()}", Toast.LENGTH_SHORT).show()
+                    },
+                ) { addMore() }
             },
         )
     }

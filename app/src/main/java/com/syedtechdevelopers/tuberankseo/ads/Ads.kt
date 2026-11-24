@@ -243,15 +243,18 @@ object Ads {
     }
 
     /** Must be called only after the user saw an intro dialog and did not skip it. */
-    fun showRewardedInterstitial(activity: Activity?, onReward: () -> Unit) {
+    fun showRewardedInterstitial(activity: Activity?, onNotEarned: () -> Unit = {}, onReward: () -> Unit) {
         val ad = rewardedInter
         if (activity == null || !ready || ad == null) {
             activity?.let { if (ready) loadRewardedInterstitial(it.applicationContext) }
             onReward(); return // no ad available: don't block the user
         }
+        var earned = false
         ad.fullScreenContentCallback = object : FullScreenContentCallback() {
             override fun onAdDismissedFullScreenContent() {
                 rewardedInter = null; loadRewardedInterstitial(activity.applicationContext)
+                // Reward is applied once the ad screen is gone, so the user sees the new titles.
+                if (earned) onReward() else onNotEarned()
             }
 
             override fun onAdFailedToShowFullScreenContent(e: AdError) {
@@ -260,7 +263,7 @@ object Ads {
         }
         lastShownAt = System.currentTimeMillis()
         suppressNextReturn()
-        ad.show(activity) { onReward() }
+        ad.show(activity) { earned = true }
     }
 
     // ---------- 1. App open ----------

@@ -52,6 +52,24 @@ class EngineTest {
     }
 
     @Test
+    fun moreTitlesAreAlwaysNew() {
+        for (p in Platform.entries) {
+            val w = fake("chicken biryani") + (1..30).associate { "chicken biryani idea $it" to 1.0 }
+            var r = SeoEngine.build("chicken biryani", w, true, "en", "PK", p, pro = false)
+            repeat(3) { round ->
+                val before = r.titles.map { it.lowercase() }.toSet()
+                val fresh = SeoEngine.moreHeadlines(r, round + 1)
+                assertTrue("$p round $round gave ${fresh.size}", fresh.size >= 3)
+                assertTrue("$p repeated titles $fresh", fresh.none { it.lowercase() in before })
+                assertTrue("$p length", fresh.all { it.length <= p.headlineMax })
+                r = r.copy(titles = (fresh + r.titles).distinct())
+                // Free users see the first 3, which must now be the new ones.
+                assertTrue(SeoEngine.basic(r).titles == fresh.take(3))
+            }
+        }
+    }
+
+    @Test
     fun offlineStillWorks() {
         val r = SeoEngine.build("photo editing", emptyMap(), false, "en", "GLOBAL", Platform.YouTube)
         assertTrue(r.titles.isNotEmpty() && r.tags.isNotEmpty() && r.hashtags.isNotEmpty())
