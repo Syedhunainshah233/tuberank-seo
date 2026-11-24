@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.2
+- R8 code shrinking and obfuscation for release builds
+- Updated androidx.fragment (was 1.1.0 via AdMob)
+- Edge-to-edge: removed deprecated status/navigation bar colours from the theme (enableEdgeToEdge handles them)
+
 ## 1.0.1
 - Targets Android 16 (API 36), required by Google Play
 

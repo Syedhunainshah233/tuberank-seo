@@ -12,8 +12,8 @@ android {
         applicationId = "com.syedtechdevelopers.tuberankseo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
     }
 
     // Play Store upload key comes from GitHub Actions secrets; it is never stored in the repo.
@@ -58,7 +58,9 @@ android {
             buildConfigField("String", "AD_REWARDED_INTERSTITIAL", "\"ca-app-pub-8064134362670148/9452606651\"")
             buildConfigField("String", "AD_NATIVE", "\"ca-app-pub-8064134362670148/6826443316\"")
             if (releaseKeystore != null) signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
+            // R8: shrink + obfuscate (Play Console "DEX code optimization").
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -95,6 +97,8 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.activity:activity-compose:1.9.3")
+    // AdMob pulls in androidx.fragment 1.1.0, which Play flags as outdated; pin a current version.
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
