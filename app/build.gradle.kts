@@ -85,6 +85,8 @@ android {
             all {
                 it.systemProperty("roborazzi.test.record", "true")
                 it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
+                // Same Maven Central mirror Gradle uses (repo1.maven.org has been failing on CI).
+                it.systemProperty("robolectric.dependency.repo.url", "https://repo.maven.apache.org/maven2")
                 it.maxHeapSize = "3g"
             }
         }
