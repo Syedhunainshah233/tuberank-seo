@@ -21,3 +21,4 @@
 - PRO free for 5 hours after watching 5 rewarded ads: unlimited generations, 100/100 SEO
 - Blurred PRO preview in every result tab
 - AdMob: app open, banner, interstitial, rewarded, rewarded interstitial, native
+
