@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.3
+- App open ad on launch: logo splash stays up while the ad loads (was dropped after 8 s on slow real-ad loads)
+
 ## 1.0.2
 - R8 code shrinking and obfuscation for release builds
 - Updated androidx.fragment (was 1.1.0 via AdMob)

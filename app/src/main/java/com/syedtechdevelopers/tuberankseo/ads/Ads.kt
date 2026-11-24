@@ -75,10 +75,10 @@ object Ads {
                 ConsentRequestParameters.Builder().build(),
                 {
                     UserMessagingPlatform.loadAndShowConsentFormIfRequired(activity) {
-                        if (consent.canRequestAds()) initSdk(activity)
+                        if (consent.canRequestAds()) initSdk(activity) else releaseSplash()
                     }
                 },
-                { if (consent.canRequestAds()) initSdk(activity) },
+                { if (consent.canRequestAds()) initSdk(activity) else releaseSplash() },
             )
             if (consent.canRequestAds()) initSdk(activity)
         }
@@ -266,13 +266,28 @@ object Ads {
     // ---------- 1. App open ----------
 
     private const val APP_OPEN_MAX_AGE_MS = 4 * 60 * 60 * 1000L
-    private const val LAUNCH_WAIT_MS = 8_000L
+    /** Longest the launch splash waits for the app open ad (first launch also starts the SDK). */
+    private const val LAUNCH_WAIT_MS = 7_000L
     private var appOpen: AppOpenAd? = null
     private var appOpenLoadedAt = 0L
     private var loadingAppOpen = false
     private var launchActivity: WeakReference<Activity>? = null
     private var launchDeadline = 0L
     private var suppressReturn = false
+
+    /** Called from onCreate on a cold start: the splash is held until the ad shows, fails or times out. */
+    fun beginLaunch(activity: Activity) {
+        if (isRobolectric) return
+        launchActivity = WeakReference(activity)
+        launchDeadline = System.currentTimeMillis() + LAUNCH_WAIT_MS
+    }
+
+    /** True while the launch splash should stay on screen. */
+    fun holdSplash(): Boolean = launchDeadline != 0L && System.currentTimeMillis() < launchDeadline
+
+    private fun releaseSplash() {
+        launchDeadline = 0L
+    }
 
     /** Call before leaving to another app of ours (share, browser, mail) so returning shows no ad. */
     fun suppressNextReturn() {
@@ -301,6 +316,7 @@ object Ads {
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     loadingAppOpen = false
+                    releaseSplash()
                 }
             },
         )
@@ -315,7 +331,7 @@ object Ads {
         }
         if (coldStart) {
             launchActivity = WeakReference(activity)
-            launchDeadline = System.currentTimeMillis() + LAUNCH_WAIT_MS
+            if (launchDeadline == 0L) launchDeadline = System.currentTimeMillis() + LAUNCH_WAIT_MS
             if (appOpenFresh()) {
                 launchDeadline = 0L
                 showAppOpen(activity)
@@ -342,6 +358,7 @@ object Ads {
             }
         }
         appOpen = null
+        releaseSplash()
         lastShownAt = System.currentTimeMillis()
         suppressNextReturn()
         ad.show(activity)

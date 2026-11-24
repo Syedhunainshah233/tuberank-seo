@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -49,8 +50,12 @@ class MainActivity : ComponentActivity() {
     private var coldStart = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Logo splash stays up while the app open ad loads on launch (Google's recommended pattern).
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
         coldStart = savedInstanceState == null
+        if (coldStart) Ads.beginLaunch(this)
+        splash.setKeepOnScreenCondition { Ads.holdSplash() }
         enableEdgeToEdge()
         setContent {
             TubeTheme { App(vm) }

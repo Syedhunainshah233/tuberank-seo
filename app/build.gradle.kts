@@ -12,8 +12,8 @@ android {
         applicationId = "com.syedtechdevelopers.tuberankseo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
     }
 
     // Play Store upload key comes from GitHub Actions secrets; it is never stored in the repo.
@@ -99,6 +99,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.3")
     // AdMob pulls in androidx.fragment 1.1.0, which Play flags as outdated; pin a current version.
     implementation("androidx.fragment:fragment-ktx:1.8.5")
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
