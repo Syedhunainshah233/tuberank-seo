@@ -85,8 +85,6 @@ android {
             all {
                 it.systemProperty("roborazzi.test.record", "true")
                 it.systemProperty("robolectric.pixelCopyRenderMode", "hardware")
-                // Same Maven Central mirror Gradle uses (repo1.maven.org has been failing on CI).
-                it.systemProperty("robolectric.dependency.repo.url", "https://repo.maven.apache.org/maven2")
                 it.maxHeapSize = "3g"
             }
         }
@@ -124,4 +122,24 @@ dependencies {
     testImplementation("io.github.takahirom.roborazzi:roborazzi:1.32.2")
     testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.32.2")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+// Robolectric's Android jars are downloaded by Gradle (with retries + CI cache) instead of by
+// Robolectric at test time, which kept failing on GitHub Actions. Tests then run offline.
+val robolectricJars: Configuration by configurations.creating { isTransitive = false }
+
+dependencies {
+    robolectricJars("org.robolectric:android-all-instrumented:14-robolectric-10818077-i7")
+    robolectricJars("org.robolectric:android-all-instrumented:15-robolectric-12650502-i7")
+}
+
+val copyRobolectricJars by tasks.registering(Copy::class) {
+    from(robolectricJars)
+    into(layout.buildDirectory.dir("robolectric-jars"))
+}
+
+tasks.withType<Test>().configureEach {
+    dependsOn(copyRobolectricJars)
+    systemProperty("robolectric.offline", "true")
+    systemProperty("robolectric.dependency.dir", layout.buildDirectory.dir("robolectric-jars").get().asFile.absolutePath)
 }
