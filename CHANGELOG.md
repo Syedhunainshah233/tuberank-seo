@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.6
+- Removed the "More titles / More hooks" button and its ad (rewarded interstitial no longer used)
+
 ## 1.0.5
 - Fix "isn't responding" (ANR): launch splash waits at most 3 s for the app open ad (was 7 s)
 - AdMob starts on a background thread; Google's OPTIMIZE_INITIALIZATION / OPTIMIZE_AD_LOADING flags on

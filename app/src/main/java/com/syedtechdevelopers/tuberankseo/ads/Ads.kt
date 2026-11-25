@@ -110,7 +110,6 @@ object Ads {
                         loadInterstitial(ctx)
                         loadAppOpen(ctx)
                         loadRewarded(ctx)
-                        loadRewardedInterstitial(ctx)
                     }
                 }
             }.onFailure { main.post { releaseSplash() } }

@@ -14,7 +14,6 @@ Android app (Kotlin + Jetpack Compose) by **SyedTechdevelopers** that generates 
 | Banner | Bottom of every screen |
 | Interstitial | Every tap on **Generate** (15 s minimum gap) |
 | Rewarded | Unlock "Ideas" (40 long-tail keywords) |
-| Rewarded interstitial | "More titles / hooks", after a 5 s intro with "No thanks" |
 | Native | Inside results, home and history |
 
 Ad unit IDs live in `app/build.gradle.kts`: **debug** builds use Google test ads, **release**

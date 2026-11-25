@@ -33,7 +33,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -46,8 +45,6 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -196,18 +193,7 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     val p = r.platform
     val tabs = listOf(p.headlineName, p.textName, p.keywordsName, "Hashtags", "Ideas", "SEO Check")
-    var askMoreTitles by remember { mutableStateOf(false) }
     val scroll = rememberScrollState()
-    val scope = rememberCoroutineScope()
-    val addMore = {
-        val n = vm.moreTitles()
-        Toast.makeText(
-            ctx,
-            if (n > 0) "✨ $n new ${p.headlineName.lowercase()} added at the top" else "No more new ${p.headlineName.lowercase()} for this keyword",
-            Toast.LENGTH_SHORT,
-        ).show()
-        scope.launch { scroll.animateScrollTo(0) }
-    }
 
     Column(Modifier.fillMaxSize()) {
         ScrollableTabRow(
@@ -239,18 +225,13 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
             when (tab) {
                 0 -> {
                     r.titles.forEachIndexed { i, t ->
-                        val badge = when {
-                            t in vm.newTitles -> "New"
-                            i == 0 && vm.newTitles.isEmpty() -> "Best"
-                            else -> null
-                        }
+                        val badge = if (i == 0) "Best" else null
                         CopyRow(t, "${t.length}/${p.headlineMax}", badge) { ctx.copy(p.headlineName.dropLast(1), t) }
                         if (i == 3) NativeAdCard(slot = "results")
                     }
                     if (!unlocked) LockedPreview(vm, "${full.titles.size} PRO ${p.headlineName.lowercase()}") {
                         full.titles.drop(3).take(6).forEach { t -> CopyRow(t, "${t.length}/${p.headlineMax}", null) {} }
                     }
-                    OutlineAction("↻  More ${p.headlineName.lowercase()}", Icons.Filled.Refresh) { askMoreTitles = true }
                 }
 
                 1 -> {
@@ -343,22 +324,6 @@ private fun Results(vm: AppViewModel, full: SeoResult) {
         }
     }
 
-    if (askMoreTitles) {
-        RewardIntro(
-            title = "More ${r.platform.headlineName.lowercase()}",
-            text = "Watch a short ad to get a new set of ${r.platform.headlineName.lowercase()}.",
-            onSkip = { askMoreTitles = false },
-            onWatch = {
-                askMoreTitles = false
-                Ads.showRewardedInterstitial(
-                    ctx.findActivity(),
-                    onNotEarned = {
-                        Toast.makeText(ctx, "Watch the full ad to get new ${p.headlineName.lowercase()}", Toast.LENGTH_SHORT).show()
-                    },
-                ) { addMore() }
-            },
-        )
-    }
 }
 
 @Composable
@@ -496,36 +461,4 @@ private fun Hint(text: String) {
     Text("💡 $text", color = C.muted, fontSize = 13.sp, modifier = Modifier.padding(horizontal = 4.dp))
 }
 
-@Composable
-private fun OutlineAction(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(C.card2)
-            .clickable(onClick = onClick)
-            .padding(14.dp),
-        contentAlignment = Alignment.Center,
-    ) { Text(text, fontWeight = FontWeight.Bold, color = C.text) }
-}
-
-/** Intro screen required by AdMob before a rewarded interstitial, with a way to skip. */
-@Composable
-fun RewardIntro(title: String, text: String, onSkip: () -> Unit, onWatch: () -> Unit) {
-    var left by remember { mutableIntStateOf(5) }
-    LaunchedEffect(Unit) {
-        while (left > 0) {
-            delay(1000); left--
-        }
-        onWatch()
-    }
-    AlertDialog(
-        onDismissRequest = onSkip,
-        containerColor = C.card,
-        title = { Text(title, fontWeight = FontWeight.Bold) },
-        text = { Text("$text\n\nAd starts in $left s…", color = C.muted) },
-        confirmButton = { TextButton(onClick = onWatch) { Text("Watch now", color = C.red, fontWeight = FontWeight.Bold) } },
-        dismissButton = { TextButton(onClick = onSkip) { Text("No thanks", color = C.muted) } },
-    )
-}
 
