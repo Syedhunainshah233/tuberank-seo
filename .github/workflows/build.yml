@@ -79,7 +79,14 @@ jobs:
       - name: Run tests
         id: tests
         continue-on-error: true
-        run: chmod +x gradlew && (./gradlew :app:testDebugUnitTest --stacktrace || (sleep 20 && ./gradlew :app:testDebugUnitTest --rerun --stacktrace))
+        run: |
+          chmod +x gradlew
+          # Robolectric downloads Android jars on first use; retry if the download hiccups.
+          for attempt in 1 2 3; do
+            if ./gradlew :app:testDebugUnitTest --rerun --stacktrace; then exit 0; fi
+            echo "Test attempt $attempt failed, retrying in 30 s"; sleep 30
+          done
+          exit 1
 
       - name: Save screenshots and test report to the 'screenshots' branch
         if: always()
