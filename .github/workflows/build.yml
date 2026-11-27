@@ -32,17 +32,36 @@ jobs:
             echo "Release key found: signed release + Play Store bundle"
             echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
             export TUBERANK_KEYSTORE="$RUNNER_TEMP/upload.jks"
-            ./gradlew :app:assembleRelease :app:bundleRelease --stacktrace
+            set -o pipefail
+            ./gradlew :app:assembleRelease :app:bundleRelease --stacktrace 2>&1 | tee build.log
             cp app/build/outputs/apk/release/app-release.apk out/TubeRankSEO.apk
             cp app/build/outputs/bundle/release/app-release.aab out/TubeRankSEO-playstore.aab
             echo "KIND=release" >> "$GITHUB_ENV"
           else
             echo "No release key: debug APK with test ads"
             # Release is built too (unsigned) to check the real-ads build compiles.
-            ./gradlew :app:assembleDebug :app:assembleRelease --stacktrace
+            set -o pipefail
+            ./gradlew :app:assembleDebug :app:assembleRelease --stacktrace 2>&1 | tee build.log
             cp app/build/outputs/apk/debug/app-debug.apk out/TubeRankSEO.apk
             echo "KIND=debug" >> "$GITHUB_ENV"
           fi
+
+      - name: Save build log to the 'build-log' branch (only when the build fails)
+        if: failure()
+        run: |
+          mkdir -p /tmp/log
+          grep -n -E "e: |error:|FAILURE|What went wrong|Could not|> " build.log | head -300 > /tmp/log/errors.txt || true
+          tail -400 build.log > /tmp/log/build-tail.txt || true
+          echo "failed @ ${GITHUB_SHA::7}" > /tmp/log/STATUS.txt
+          git config user.name "tuberank-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout --orphan build-log
+          git rm -rfq . || true
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -r /tmp/log/. .
+          git add -A
+          git commit -qm "Build log for ${GITHUB_SHA::7}"
+          git push -f origin build-log
 
       - uses: actions/upload-artifact@v4
         with:
