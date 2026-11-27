@@ -1,0 +1,73 @@
+2:> Task :app:preBuild UP-TO-DATE
+3:> Task :app:preReleaseBuild UP-TO-DATE
+4:> Task :app:mergeReleaseJniLibFolders
+5:> Task :app:mergeReleaseNativeLibs
+6:> Task :app:buildKotlinToolingMetadata
+7:> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+9:> Task :app:stripReleaseDebugSymbols
+10:Unable to strip the following libraries, packaging them as they are: libandroidx.graphics.path.so, libunitycoherencenative.so. Run with --info option to learn more.
+12:> Task :app:generateReleaseBuildConfig
+13:> Task :app:extractReleaseNativeSymbolTables
+14:> Task :app:checkReleaseDuplicateClasses
+15:> Task :app:mergeReleaseNativeDebugMetadata NO-SOURCE
+16:> Task :app:generateReleaseResValues
+17:> Task :app:checkReleaseAarMetadata
+18:> Task :app:mapReleaseSourceSetPaths
+19:> Task :app:generateReleaseResources
+20:> Task :app:packageReleaseResources
+21:> Task :app:createReleaseCompatibleScreenManifests
+22:> Task :app:mergeReleaseResources
+23:> Task :app:extractDeepLinksRelease
+24:> Task :app:parseReleaseLocalResources
+25:> Task :app:processReleaseMainManifest
+26:> Task :app:processReleaseManifest
+27:> Task :app:processReleaseManifestForPackage
+28:> Task :app:javaPreCompileRelease
+29:> Task :app:mergeReleaseArtProfile
+30:> Task :app:extractProguardFiles
+31:> Task :app:mergeReleaseStartupProfile
+32:> Task :app:mergeReleaseShaders
+33:> Task :app:compileReleaseShaders NO-SOURCE
+34:> Task :app:generateReleaseAssets UP-TO-DATE
+35:> Task :app:mergeReleaseAssets
+36:> Task :app:compressReleaseAssets
+37:> Task :app:extractReleaseVersionControlInfo
+38:> Task :app:collectReleaseDependencies
+39:> Task :app:processReleaseResources
+40:> Task :app:sdkReleaseDependencyData
+41:> Task :app:validateSigningRelease
+42:> Task :app:writeReleaseAppMetadata
+43:> Task :app:writeReleaseSigningConfigVersions
+44:> Task :app:configureReleaseDependencies
+45:> Task :app:parseReleaseIntegrityConfig
+47:> Task :app:compileReleaseKotlin FAILED
+48:e: org.jetbrains.kotlin.util.FileAnalysisException: While analysing /home/runner/work/tuberank-seo/tuberank-seo/app/src/main/java/com/syedtechdevelopers/tuberankseo/AppViewModel.kt:24:5: java.lang.IllegalArgumentException: source must not be null
+131:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/abuse.orcas.externs.java.com.google.abuse.orcas.externs_externs.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+132:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.gms.libs.filecompliance.proto_file_access_api_type_kt_proto_lite.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+133:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.admob.ad_quality_metrics.internal_ad_quality_lib_impl.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+134:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.admob.ad_quality_metrics_ad_quality_data_pinger.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+135:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.admob.ad_quality_metrics_ad_quality_data_serializer.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+136:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.admob.ad_quality_metrics_ad_quality_data_store_module.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+137:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.admob.ad_quality_metrics_ad_quality_kt_proto_lite.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+138:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.admob.ad_quality_metrics_ad_quality_lib.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+139:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.admob.ad_quality_metrics_ad_quality_scope_provider.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+140:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.admob.ad_quality_metrics_clock.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+141:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.ads.mobile.sdk.internal.annotations_annotations.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+142:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.ads.mobile.sdk.internal.util_clock.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+143:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.ads.mobile.sdk.internal.util_clock_module.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+144:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.android.libraries.internal.ads.adshield.protos_adshield_options_kt_proto_lite.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+145:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.async.coroutines_annotations.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+146:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/java.com.google.async.coroutines_coroutines-android.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+147:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/logs.proto.chrome_search_chrome_search_extensions_kt_proto_lite.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+148:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/third_party.kotlin.protobuf.src.commonMain.kotlin.com.google.protobuf.kotlin_only_for_use_in_proto_generated_code_its_generator_and_tests.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+149:e: file:///home/runner/.gradle/caches/8.11.1/transforms/01b3fe1afd63c464104babb6c21cc654/transformed/play-services-ads-25.4.0-api.jar!/META-INF/third_party.kotlin.protobuf.src.commonMain.kotlin.com.google.protobuf.kotlin_shared_runtime.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+150:e: file:///home/runner/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.3.0/ebc4eb2b6e6c91b6c844c1e3183920d86f2ef656/kotlin-stdlib-2.3.0.jar!/META-INF/kotlin-stdlib-jdk7.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+151:e: file:///home/runner/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.3.0/ebc4eb2b6e6c91b6c844c1e3183920d86f2ef656/kotlin-stdlib-2.3.0.jar!/META-INF/kotlin-stdlib-jdk8.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+152:e: file:///home/runner/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/2.3.0/ebc4eb2b6e6c91b6c844c1e3183920d86f2ef656/kotlin-stdlib-2.3.0.jar!/META-INF/kotlin-stdlib.kotlin_module Module was compiled with an incompatible version of Kotlin. The binary version of its metadata is 2.3.0, expected version is 2.1.0.
+155:FAILURE: Build failed with an exception.
+157:* What went wrong:
+159:> A failure occurred while executing org.jetbrains.kotlin.compilerRunner.GradleCompilerRunnerWithWorkers$GradleKotlinCompilerWorkAction
+160:   > Internal compiler error. See log for more details
+163:> Run with --info or --debug option to get more log output.
+164:> Run with --scan to get full insights.
+165:> Get more help at https://help.gradle.org.
