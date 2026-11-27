@@ -12,8 +12,8 @@ android {
         applicationId = "com.syedtechdevelopers.tuberankseo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 8
-        versionName = "1.0.7"
+        versionCode = 9
+        versionName = "1.0.8"
     }
 
     // Play Store upload key comes from GitHub Actions secrets; it is never stored in the repo.
@@ -113,7 +113,11 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core")
 
     // AdMob + consent (GDPR) form
-    implementation("com.google.android.gms:play-services-ads:23.5.0")
+    implementation("com.google.android.gms:play-services-ads:25.4.0")
+    // Unity Ads through AdMob mediation (bidding): Unity competes with AdMob for every ad slot.
+    // Game ID + placement IDs are set in the AdMob console (Mediation), not in code.
+    implementation("com.unity3d.ads:unity-ads:4.20.0")
+    implementation("com.google.ads.mediation:unity:4.20.0.1")
     implementation("com.google.android.ump:user-messaging-platform:3.1.0")
 
     testImplementation("junit:junit:4.13.2")

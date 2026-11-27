@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.8
+- Unity Ads added through AdMob mediation (banner, interstitial, rewarded)
+- Google Mobile Ads SDK updated to 25.4.0
+
 ## 1.0.7
 - Fix: "Watch 5 ads • Unlock FREE" button in locked sections now opens PRO (taps were going to the hidden list behind it)
 
