@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.7
+- Fix: "Watch 5 ads • Unlock FREE" button in locked sections now opens PRO (taps were going to the hidden list behind it)
+
 ## 1.0.6
 - Removed the "More titles / More hooks" button and its ad (rewarded interstitial no longer used)
 

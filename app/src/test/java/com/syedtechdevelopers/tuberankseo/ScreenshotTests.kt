@@ -77,6 +77,14 @@ class ScreenshotTests {
         click("⚡ Generate", substring = true)
         waitFor("SEO Check")
         shot("02_result_titles")
+        for (t in listOf("Titles", "Description", "Tags", "Hashtags", "Ideas", "SEO Check")) {
+            click(t)
+            click("Unlock FREE", substring = true)
+            waitFor("PRO is FREE")
+            if (t == "Titles") shot("02b_unlock_opens_pro")
+            click("Close")
+        }
+        click("Titles")
         click("Description"); shot("03_result_description")
         click("Tags"); shot("04_result_tags")
         click("Hashtags"); shot("05_result_hashtags")

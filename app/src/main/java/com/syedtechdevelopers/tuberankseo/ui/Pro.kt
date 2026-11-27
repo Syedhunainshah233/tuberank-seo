@@ -208,8 +208,7 @@ fun LockedPreview(vm: AppViewModel, title: String, content: @Composable ColumnSc
             .fillMaxWidth()
             .heightIn(max = 360.dp)
             .clip(RoundedCornerShape(18.dp))
-            .border(1.dp, GOLD.copy(alpha = 0.6f), RoundedCornerShape(18.dp))
-            .clickable { vm.showPro = true },
+            .border(1.dp, GOLD.copy(alpha = 0.6f), RoundedCornerShape(18.dp)),
     ) {
         Column(
             Modifier
@@ -220,10 +219,13 @@ fun LockedPreview(vm: AppViewModel, title: String, content: @Composable ColumnSc
             content = content,
         )
         // Older phones can't blur: cover more strongly so the text can't be read.
+        // This layer sits ON TOP of the blurred list and takes every tap, so taps never reach the
+        // hidden rows underneath (they used to copy hidden PRO text instead of opening PRO).
         Box(
             Modifier
                 .matchParentSize()
-                .background(C.bg.copy(alpha = if (blurOk) 0.35f else 0.88f)),
+                .background(C.bg.copy(alpha = if (blurOk) 0.35f else 0.88f))
+                .clickable { vm.showPro = true },
         )
         Column(
             Modifier
@@ -232,6 +234,7 @@ fun LockedPreview(vm: AppViewModel, title: String, content: @Composable ColumnSc
                 .clip(RoundedCornerShape(16.dp))
                 .background(C.card.copy(alpha = 0.96f))
                 .border(1.dp, GOLD, RoundedCornerShape(16.dp))
+                .clickable { vm.showPro = true }
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -244,6 +247,7 @@ fun LockedPreview(vm: AppViewModel, title: String, content: @Composable ColumnSc
                 Modifier
                     .clip(RoundedCornerShape(12.dp))
                     .background(GOLD)
+                    .clickable { vm.showPro = true }
                     .padding(horizontal = 14.dp, vertical = 9.dp),
             ) { Text(FREE_PRO_CTA, color = C.bg, fontWeight = FontWeight.ExtraBold, fontSize = 14.sp) }
         }
