@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.syedtechdevelopers.tuberankseo.EngineTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-28T07:06:56" hostname="runnervm3lb7s" time="9.768">
+  <properties/>
+  <testcase name="offlineStillWorks" classname="com.syedtechdevelopers.tuberankseo.EngineTest" time="8.055"/>
+  <testcase name="basicIsAboutHalfProIsFull" classname="com.syedtechdevelopers.tuberankseo.EngineTest" time="0.119"/>
+  <testcase name="liveSample" classname="com.syedtechdevelopers.tuberankseo.EngineTest" time="1.477"/>
+  <testcase name="moreTitlesAreAlwaysNew" classname="com.syedtechdevelopers.tuberankseo.EngineTest" time="0.072"/>
+  <testcase name="limitsPerPlatform" classname="com.syedtechdevelopers.tuberankseo.EngineTest" time="0.041"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

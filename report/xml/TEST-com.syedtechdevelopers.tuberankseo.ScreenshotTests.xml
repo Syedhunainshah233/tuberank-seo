@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.syedtechdevelopers.tuberankseo.ScreenshotTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-28T07:07:06" hostname="runnervm3lb7s" time="13.838">
+  <properties/>
+  <testcase name="walkThrough" classname="com.syedtechdevelopers.tuberankseo.ScreenshotTests" time="13.838"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
