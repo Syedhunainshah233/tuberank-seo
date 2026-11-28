@@ -79,7 +79,7 @@ fun DiamondCard(vm: AppViewModel) {
         Box(
             Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .height(58.dp)
                 .clip(RoundedCornerShape(14.dp))
                 .background(GOLD)
                 .clickable(enabled = !loading) {
@@ -102,7 +102,10 @@ fun DiamondCard(vm: AppViewModel) {
             if (loading) {
                 CircularProgressIndicator(color = C.bg, strokeWidth = 2.dp, modifier = Modifier.size(22.dp))
             } else {
-                Text("🎬 Earn Diamonds • Watch 1 ad = +1 💎", color = C.bg, fontWeight = FontWeight.ExtraBold, fontSize = 15.sp)
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("🎬 Earn Diamonds", color = C.bg, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp, maxLines = 1)
+                    Text("Watch 1 ad = +1 💎", color = C.bg, fontSize = 12.sp, maxLines = 1)
+                }
             }
         }
         Spacer(Modifier.height(6.dp))
