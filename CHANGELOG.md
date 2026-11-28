@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.9
+- New: Diamonds — watch 1 ad = +1 💎 (Settings → Earn Diamonds)
+- New: Diamond history with date and time of every diamond
+- New: Shop (coming soon)
+
 ## 1.0.8
 - Unity Ads added through AdMob mediation (banner, interstitial, rewarded)
 - Google Mobile Ads SDK updated to 25.4.0, Kotlin 2.2.20

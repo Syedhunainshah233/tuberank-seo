@@ -83,5 +83,13 @@ class SmallScreenTests {
         click("Close")
         click("Facebook"); shot("s320_07_home_facebook")
         click("Settings"); shot("s320_08_settings")
+        // Diamonds: earn 3 (as if 3 ads were watched), then open history and shop.
+        rule.runOnUiThread { repeat(3) { rule.activity.vm.addDiamond() } }
+        rule.waitForIdle()
+        shot("s320_09b_settings_diamonds")
+        click("Diamond history", substring = true); waitFor("Total: 3 diamonds"); shot("s320_09c_diamond_history")
+        rule.runOnUiThread { rule.activity.vm.page = null }
+        click("Shop", substring = true); waitFor("Shop is coming soon"); shot("s320_09d_shop")
+        rule.runOnUiThread { rule.activity.vm.page = null }
     }
 }

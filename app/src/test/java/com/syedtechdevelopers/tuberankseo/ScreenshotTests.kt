@@ -109,5 +109,13 @@ class ScreenshotTests {
         click("Later")
         click("History"); shot("12_history")
         click("Settings"); shot("13_settings")
+        // Diamonds: earn 3 (as if 3 ads were watched), then open history and shop.
+        rule.runOnUiThread { repeat(3) { rule.activity.vm.addDiamond() } }
+        rule.waitForIdle()
+        shot("13b_settings_diamonds")
+        click("Diamond history", substring = true); waitFor("Total: 3 diamonds"); shot("13c_diamond_history")
+        rule.runOnUiThread { rule.activity.vm.page = null }
+        click("Shop", substring = true); waitFor("Shop is coming soon"); shot("13d_shop")
+        rule.runOnUiThread { rule.activity.vm.page = null }
     }
 }

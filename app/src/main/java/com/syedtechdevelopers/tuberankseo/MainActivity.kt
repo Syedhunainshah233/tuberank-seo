@@ -43,6 +43,8 @@ import com.syedtechdevelopers.tuberankseo.ui.HomeScreen
 import com.syedtechdevelopers.tuberankseo.ui.ResultScreen
 import com.syedtechdevelopers.tuberankseo.ui.SettingsScreen
 import com.syedtechdevelopers.tuberankseo.ui.TubeTheme
+import com.syedtechdevelopers.tuberankseo.ui.ShopScreen
+import com.syedtechdevelopers.tuberankseo.ui.DiamondHistoryScreen
 import com.syedtechdevelopers.tuberankseo.ui.findActivity
 
 class MainActivity : ComponentActivity() {
@@ -107,9 +109,15 @@ fun App(vm: AppViewModel) {
                     Tab.Settings -> SettingsScreen(vm)
                 }
             }
+            // Pages opened from Settings (Shop, Diamond history) cover the tabs.
+            when (vm.page) {
+                Page.Shop -> ShopScreen(vm)
+                Page.DiamondHistory -> DiamondHistoryScreen(vm)
+                null -> {}
+            }
         }
         BannerAd()
-        if (!vm.showResult) {
+        if (!vm.showResult && vm.page == null) {
             BackHandler(enabled = vm.tab != Tab.Home) { vm.tab = Tab.Home }
             NavigationBar(containerColor = C.card, modifier = Modifier.fillMaxWidth(), windowInsets = WindowInsets(0)) {
                 listOf(

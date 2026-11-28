@@ -43,6 +43,25 @@ class Store(context: Context) {
         (0 until arr.length()).mapNotNull { runCatching { fromJson(arr.getJSONObject(it)) }.getOrNull() }
     }.getOrDefault(emptyList())
 
+    // ---- Diamonds (kept on this phone) ----
+    var diamonds: Int
+        get() = sp.getInt("diamonds", 0)
+        set(v) = sp.edit().putInt("diamonds", v).apply()
+
+    fun loadDiamondLog(): List<DiamondEntry> = runCatching {
+        val arr = JSONArray(sp.getString("diamondLog", "[]"))
+        (0 until arr.length()).map {
+            val o = arr.getJSONObject(it)
+            DiamondEntry(o.getLong("t"), o.getInt("a"), o.optString("r", "Watched an ad"))
+        }
+    }.getOrDefault(emptyList())
+
+    fun saveDiamondLog(list: List<DiamondEntry>) {
+        val arr = JSONArray()
+        list.take(500).forEach { arr.put(JSONObject().put("t", it.time).put("a", it.amount).put("r", it.reason)) }
+        sp.edit().putString("diamondLog", arr.toString()).apply()
+    }
+
     fun saveHistory(list: List<SeoResult>) {
         val arr = JSONArray()
         list.take(50).forEach { arr.put(toJson(it)) }
@@ -68,3 +87,6 @@ class Store(context: Context) {
         createdAt = o.getLong("at"), platform = Platform.of(o.optString("p", "YouTube")), pro = o.optBoolean("pro", true),
     )
 }
+
+/** One line in the diamond history: when, how many, and why. */
+data class DiamondEntry(val time: Long, val amount: Int, val reason: String)

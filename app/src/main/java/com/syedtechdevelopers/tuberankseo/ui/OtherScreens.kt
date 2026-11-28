@@ -125,6 +125,7 @@ fun SettingsScreen(vm: AppViewModel) {
     ) {
         Title("Settings")
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            DiamondCard(vm)
             Card {
                 Text("Defaults", fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(10.dp))

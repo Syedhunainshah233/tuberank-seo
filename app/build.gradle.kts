@@ -12,8 +12,8 @@ android {
         applicationId = "com.syedtechdevelopers.tuberankseo"
         minSdk = 26
         targetSdk = 36
-        versionCode = 9
-        versionName = "1.0.8"
+        versionCode = 10
+        versionName = "1.0.9"
     }
 
     // Play Store upload key comes from GitHub Actions secrets; it is never stored in the repo.

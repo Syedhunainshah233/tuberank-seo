@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.syedtechdevelopers.tuberankseo.data.DiamondEntry
 import com.syedtechdevelopers.tuberankseo.data.Platform
 import com.syedtechdevelopers.tuberankseo.data.SeoEngine
 import com.syedtechdevelopers.tuberankseo.data.SeoResult
@@ -17,6 +18,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 enum class Tab { Home, History, Settings }
+
+enum class Page { Shop, DiamondHistory }
 
 class AppViewModel(app: Application) : AndroidViewModel(app) {
     val store = Store(app)
@@ -54,6 +57,22 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var showLimit by mutableStateOf(false)
     var showPro by mutableStateOf(false)
+
+    // ---------- Diamonds & Shop ----------
+    /** Full-screen pages opened from Settings. */
+    var page by mutableStateOf<Page?>(null)
+    var diamonds by mutableIntStateOf(store.diamonds)
+        private set
+    val diamondLog = mutableStateListOf<DiamondEntry>().apply { addAll(store.loadDiamondLog()) }
+
+    /** Called after a rewarded ad was fully watched. */
+    fun addDiamond(amount: Int = 1, reason: String = "Watched an ad") {
+        diamonds += amount
+        store.diamonds = diamonds
+        diamondLog.add(0, DiamondEntry(System.currentTimeMillis(), amount, reason))
+        while (diamondLog.size > 500) diamondLog.removeAt(diamondLog.lastIndex)
+        store.saveDiamondLog(diamondLog)
+    }
 
     /** Updated once a minute by the UI so the timer and PRO state stay current. */
     var now by mutableStateOf(System.currentTimeMillis())
